@@ -1,0 +1,93 @@
+:root {
+    --neon-green: #39ff14;
+    --dark-bg: #0a0a0a;
+}
+
+body {
+    margin: 0;
+    font-family: 'Rajdhani', sans-serif;
+    background-color: var(--dark-bg);
+    color: white;
+    overflow-x: hidden;
+}
+
+/* Efecto 3D de fondo */
+.background-3d {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                url('https://unsplash.com'); /* Imagen urbana */
+    background-size: cover;
+    background-position: center;
+    z-index: -1;
+    transform: scale(1.1);
+    filter: blur(2px);
+}
+
+header {
+    text-align: center;
+    padding: 40px;
+}
+
+.logo {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 4rem;
+    text-shadow: 3px 3px 0px var(--neon-green), 6px 6px 0px #ff0055;
+    letter-spacing: 5px;
+}
+
+#player-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 20px;
+    perspective: 1000px; /* Activa el 3D */
+}
+
+.song-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d;
+}
+
+.song-card:hover {
+    transform: rotateY(10deg) rotateX(5deg) scale(1.05);
+    border-color: var(--neon-green);
+}
+
+.cover-wrapper img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    margin-bottom: 15px;
+}
+
+audio {
+    width: 100%;
+    margin: 20px 0;
+    filter: invert(100%); /* Hace que el reproductor combine con el dark mode */
+}
+
+.btn-download {
+    display: inline-block;
+    background: var(--neon-green);
+    color: black;
+    padding: 10px 20px;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.btn-download:hover {
+    background: white;
+    box-shadow: 0 0 20px var(--neon-green);
+}
