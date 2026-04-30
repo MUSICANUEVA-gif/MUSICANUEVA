@@ -5,14 +5,13 @@
     <title>MUSICANUEVA</title>
     <style>
         body { 
-            /* ESTO PONE LA IMAGEN DE FONDO EN TODA LA PÁGINA */
+            /* ESTO AGREGA EL FONDO URBANO QUE ME PEDISTE */
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
                         url('https://postimg.cc'); 
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
             background-color: #000; 
-            
             color: #fff; 
             font-family: sans-serif; 
             display: flex; 
@@ -21,7 +20,7 @@
             min-height: 100vh; 
             margin: 0; 
         }
-        .tarjeta { background: #000; border: 2.5px solid #00f7ff; border-radius: 15px; width: 300px; padding: 20px; text-align: center; box-shadow: 0 0 25px #00f7ff; }
+        .tarjeta { background: #000; border: 2px solid #00f7ff; border-radius: 15px; width: 300px; padding: 20px; text-align: center; box-shadow: 0 0 20px #00f7ff; }
         .cubrir { width: 100%; border-radius: 10px; margin-bottom: 15px; }
         h3 { color: #00f7ff; margin-bottom: 15px; font-size: 1.1em; }
         audio { width: 100%; height: 35px; margin-bottom: 20px; filter: invert(1); }
@@ -32,12 +31,21 @@
 <body>
 
     <div class="tarjeta">
-        <img src="https://archive.org" class="cubrir">
+        <!-- IMAGEN DIRECTA -->
+        <img src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/coqueta%20-%20la%20bella%20luz.jpg" class="cubrir">
+        
         <h3>LA BELLA LUZ - COQUETA</h3>
-        <audio controls src="https://archive.org"></audio>
-        <a href="https://archive.org" class="boton-descarga" download="La_Bella_Luz_Coqueta.mp3">DESCARGAR MP3</a>
+        
+        <!-- AUDIO DIRECTO -->
+        <audio controls src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3"></audio>
+        
+        <!-- DESCARGA DIRECTA -->
+        <a href="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3" 
+           class="boton-descarga" 
+           download="La_Bella_Luz_Coqueta.mp3">
+           DESCARGAR MP3
+        </a>
     </div>
 
 </body>
 </html>
-
