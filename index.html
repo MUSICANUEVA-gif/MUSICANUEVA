@@ -6,6 +6,12 @@
     <title>MUSICA NUEVA</title>
     <style>
         body { 
+            /* BUSCARÁ TU IMAGEN SUBIDA DESDE PC LLAMADA fondo.jpg */
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('fondo.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             background-color: #000; 
             color: #fff; 
             font-family: sans-serif; 
@@ -30,7 +36,7 @@
             text-transform: uppercase;
         }
         .tarjeta { 
-            background: #000; 
+            background: rgba(0, 0, 0, 0.85); 
             border: 2px solid #00f7ff; 
             border-radius: 12px; 
             width: 100%; 
@@ -39,6 +45,7 @@
             text-align: center; 
             box-shadow: 0 0 15px rgba(0, 247, 255, 0.4); 
             overflow: hidden;
+            backdrop-filter: blur(5px);
         }
         .cubrir { 
             width: 100%; 
