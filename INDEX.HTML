@@ -2,76 +2,82 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- ETIQUETA CRÍTICA PARA CELULARES -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MUSAICA NUEVA - LA BELLA LUZ</title>
+    <title>MUSICA NUEVA</title>
     <style>
         body { 
             background-color: #000; 
             color: #fff; 
             font-family: sans-serif; 
+            margin: 0; 
+            padding: 20px;
             display: flex; 
             justify-content: center; 
             flex-wrap: wrap; 
             align-content: flex-start;
             gap: 20px; 
-            padding: 15px; /* Reducido un poco para móviles */
-            margin: 0; 
             min-height: 100vh; 
+        }
+        .header-principal {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .header-principal h1 {
+            color: #00f7ff;
+            text-shadow: 0 0 10px #00f7ff;
+            font-size: 2rem;
+            text-transform: uppercase;
         }
         .tarjeta { 
             background: #000; 
             border: 2px solid #00f7ff; 
             border-radius: 12px; 
-            width: 280px; /* Un poco más ancha para aprovechar el espacio */
-            max-width: 90%; /* Evita que se salga en pantallas muy pequeñas */
+            width: 100%; 
+            max-width: 280px; 
             padding: 15px 15px 0px 15px; 
             text-align: center; 
-            box-shadow: 0 0 10px #00f7ff; 
+            box-shadow: 0 0 15px rgba(0, 247, 255, 0.4); 
             overflow: hidden;
-            margin-bottom: 10px;
         }
         .cubrir { 
             width: 100%; 
-            aspect-ratio: 1 / 1; /* Mantiene la imagen cuadrada en cualquier móvil */
-            object-fit: cover;
+            aspect-ratio: 1/1; 
+            object-fit: cover; 
             border-radius: 8px; 
             margin-bottom: 15px; 
+            display: block;
         }
-        h3 { color: #00f7ff; margin-bottom: 15px; font-size: 1.1em; }
-        
-        /* Ajuste para reproductores en iOS/Android */
+        h3 { color: #fff; margin-bottom: 15px; font-size: 1.1em; height: 1.2em; overflow: hidden; text-transform: uppercase; }
         audio { 
             width: 100%; 
             height: 35px; 
             margin-bottom: 15px; 
             filter: invert(1); 
-            -webkit-appearance: none; /* Mejor compatibilidad en iPhone */
         }
-        
         .boton-de-descarga { 
             display: block; 
             background: #00f7ff; 
             color: #000; 
-            padding: 18px; /* Un poco más alto para que sea fácil tocar con el dedo */
+            padding: 18px; 
             text-decoration: none; 
             font-weight: bold; 
-            border-radius: 0; /* Al estar pegado al borde, se ve mejor recto en móvil */
             text-transform: uppercase; 
             font-size: 0.9em;
-            margin: 0 -15px;
+            margin: 0 -15px; 
             transition: background 0.3s;
         }
-        
-        /* Evita el efecto gris molesto al tocar en móviles Android/iOS */
-        * { -webkit-tap-highlight-color: transparent; }
-
         .boton-de-descarga:hover { background: #fff; }
+        * { -webkit-tap-highlight-color: transparent; }
     </style>
 </head>
 <body>
 
-    <!-- TARJETA NUEVA -->
+    <div class="header-principal">
+        <h1>MUSICA NUEVA</h1>
+    </div>
+
+    <!-- 1. JULIITO (PRIMERO ARRIBA CON ENLACES REALES) -->
     <div class="tarjeta">
         <img src="https://ia902806.us.archive.org/16/items/j1_20260502/kilo.jpg" class="cubrir">
         <h3>Juliito - K.i.L.O</h3>
@@ -79,7 +85,7 @@
         <a href="https://ia902806.us.archive.org/16/items/j1_20260502/Juliito%20-%20K.i.L.O.mp3" class="boton-de-descarga" download>Descargar MP3</a>
     </div>
 
-    <!-- TARJETA ANTERIOR -->
+    <!-- 2. LA BELLA LUZ (DEBAJO CON ENLACES REALES) -->
     <div class="tarjeta">
         <img src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/coqueta%20-%20la%20bella%20luz.jpg" class="cubrir">
         <h3>COQUETA - LA BELLA LUZ</h3>
