@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <!-- Esta línea garantiza la compatibilidad automática con iPhone, Android y Tablets -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MUSICA NUEVA</title>
     <style>
@@ -13,7 +14,7 @@
             padding: 20px;
             display: flex; 
             justify-content: center; 
-            flex-wrap: wrap; 
+            flex-wrap: wrap; /* Permite que las tarjetas bajen solas en celulares */
             align-content: flex-start;
             gap: 20px; 
             min-height: 100vh; 
@@ -34,7 +35,7 @@
             border: 2px solid #00f7ff; 
             border-radius: 12px; 
             width: 100%; 
-            max-width: 280px; 
+            max-width: 280px; /* Tamaño fijo en PC, adaptable en móvil */
             padding: 15px 15px 0px 15px; 
             text-align: center; 
             box-shadow: 0 0 15px rgba(0, 247, 255, 0.4); 
@@ -68,6 +69,7 @@
             transition: background 0.3s;
         }
         .boton-de-descarga:hover { background: #fff; }
+        /* Evita el resaltado azul al tocar en móviles */
         * { -webkit-tap-highlight-color: transparent; }
     </style>
 </head>
@@ -77,7 +79,7 @@
         <h1>MUSICA NUEVA</h1>
     </div>
 
-    <!-- CANCIÓN 1: JULIITO -->
+    <!-- 1. JULIITO (TUS ENLACES ORIGINALES INTACTOS) -->
     <div class="tarjeta">
         <img src="https://ia902806.us.archive.org/16/items/j1_20260502/kilo.jpg" class="cubrir">
         <h3>Juliito - K.i.L.O</h3>
@@ -85,7 +87,7 @@
         <a href="https://ia902806.us.archive.org/16/items/j1_20260502/Juliito%20-%20K.i.L.O.mp3" class="boton-de-descarga" download>Descargar MP3</a>
     </div>
 
-    <!-- CANCIÓN 2: LA BELLA LUZ -->
+    <!-- 2. LA BELLA LUZ (TUS ENLACES ORIGINALES INTACTOS) -->
     <div class="tarjeta">
         <img src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/coqueta%20-%20la%20bella%20luz.jpg" class="cubrir">
         <h3>COQUETA - LA BELLA LUZ</h3>
