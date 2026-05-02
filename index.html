@@ -1,82 +1,65 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>MUSICANUEVA</title>
+    <title>MUSAICA NUEVA - LA BELLA LUZ</title>
     <style>
         body { 
-            /* ESTO AGREGA EL FONDO URBANO QUE ME PEDISTE */
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
-                        url('https://postimg.cc'); 
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
             background-color: #000; 
             color: #fff; 
             font-family: sans-serif; 
             display: flex; 
             justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
+            flex-wrap: wrap; 
+            gap: 20px; 
+            padding: 20px; 
             margin: 0; 
+            min-height: 100vh; 
         }
-        .tarjeta { background: #000; border: 2px solid #00f7ff; border-radius: 15px; width: 300px; padding: 20px; text-align: center; box-shadow: 0 0 20px #00f7ff; }
-        .cubrir { width: 100%; border-radius: 10px; margin-bottom: 15px; }
+        .tarjeta { 
+            background: #000; 
+            border: 2px solid #00f7ff; 
+            border-radius: 12px; 
+            width: 260px; 
+            padding: 15px; 
+            text-align: center; 
+            box-shadow: 0 0 10px #00f7ff; 
+        }
+        .cubrir { width: 100%; border-radius: 8px; margin-bottom: 15px; }
         h3 { color: #00f7ff; margin-bottom: 15px; font-size: 1.1em; }
-        audio { width: 100%; height: 35px; margin-bottom: 20px; filter: invert(1); }
-        .boton-descarga { display: block; background: #00f7ff; color: #000; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 8px; text-transform: uppercase; }
-        .boton-descarga:hover { background: #fff; }
+        audio { width: 100%; height: 35px; margin-bottom: 15px; filter: invert(1); }
+        .boton-de-descarga { 
+            display: block; 
+            background: #00f7ff; 
+            color: #000; 
+            padding: 12px; 
+            text-decoration: none; 
+            font-weight: bold; 
+            border-radius: 5px; 
+            text-transform: uppercase; 
+            font-size: 0.9em;
+        }
+        .boton-de-descarga:hover { background: #fff; }
     </style>
 </head>
 <body>
 
+    <!-- TARJETA 1 -->
     <div class="tarjeta">
-        <!-- IMAGEN DIRECTA -->
         <img src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/coqueta%20-%20la%20bella%20luz.jpg" class="cubrir">
-        
-        <h3>LA BELLA LUZ - COQUETA</h3>
-        
-        <!-- AUDIO DIRECTO -->
-        <audio controls src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3"></audio>
-        
-        <!-- DESCARGA DIRECTA -->
-        <a href="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3" 
-           class="boton-descarga" 
-           download="La_Bella_Luz_Coqueta.mp3">
-           DESCARGAR MP3
-        </a>
+        <h3>COQUETA - LA BELLA LUZ    <audio controls src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3"></audio>
+        <a href="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3" class="boton-de-descarga" download>Descargar MP3</a>
     </div>
 
+    <!-- TARJETA 2 CORREGIDA -->
     <div class="tarjeta">
-        <!-- IMAGEN DIRECTA -->
-        <img src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/coqueta%20-%20la%20bella%20luz.jpg" class="cubrir">
-        
-        <h3>LA BELLA LUZ - COQUETA</h3>
-        
-        <!-- AUDIO DIRECTO -->
-        <audio controls src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3"></audio>
-        
-        <!-- DESCARGA DIRECTA -->
-        <a href="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3" 
-           class="boton-descarga" 
-           download="La_Bella_Luz_Coqueta.mp3">
-           DESCARGAR MP3
-        </a>
-    </div><div class="tarjeta">
-        <!-- IMAGEN DIRECTA -->
-        <img src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/coqueta%20-%20la%20bella%20luz.jpg" class="cubrir">
-        
-        <h3>LA BELLA LUZ - COQUETA</h3>
-        
-        <!-- AUDIO DIRECTO -->
-        <audio controls src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3"></audio>
-        
-        <!-- DESCARGA DIRECTA -->
-        <a href="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3" 
-           class="boton-descarga" 
-           download="La_Bella_Luz_Coqueta.mp3">
-           DESCARGAR MP3
-        </a>
+        <img src="https://ia902806.us.archive.org/16/items/j1_20260502/kilo.jpg" class="cubrir">
+        <h3>Juliito - K.i.L.O</h3>
+        <audio controls src="https://ia902806.us.archive.org/16/items/j1_20260502/Juliito%20-%20K.i.L.O.mp3"></audio>
+        <!-- Se agregó class="boton-de-descarga" aquí -->
+        <a href="https://ia902806.us.archive.org/16/items/j1_20260502/Juliito%20-%20K.i.L.O.mp3" class="boton-de-descarga" download>Descargar MP3</a>
     </div>
+
 </body>
 </html>
