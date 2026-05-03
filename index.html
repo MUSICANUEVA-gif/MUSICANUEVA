@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+Put your HTML text here<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +7,6 @@
     <title>MUSICA NUEVA</title>
     <style>
         body { 
-            /* BUSCARÁ TU IMAGEN SUBIDA DESDE PC LLAMADA fondo.jpg */
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
                         url('fondo.jpg'); 
             background-size: cover;
@@ -34,9 +34,8 @@
             text-shadow: 0 0 10px #00f7ff;
             font-size: 2rem;
             text-transform: uppercase;
-            margin-bottom: 5px; /* Ajuste de espacio */
+            margin-bottom: 5px;
         }
-        /* Estilo para el nuevo subtítulo */
         .header-principal h2 {
             color: #00f7ff;
             text-shadow: 0 0 10px #00f7ff;
@@ -45,6 +44,31 @@
             margin-top: 0;
             letter-spacing: 2px;
         }
+
+        /* --- ESTILO DEL BUSCADOR --- */
+        .contenedor-buscador {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        #buscador {
+            width: 90%;
+            max-width: 400px;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: 2px solid #00f7ff;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 247, 255, 0.2);
+        }
+        #buscador::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
         .tarjeta { 
             background: rgba(0, 0, 0, 0.85); 
             border: 2px solid #00f7ff; 
@@ -56,7 +80,11 @@
             box-shadow: 0 0 15px rgba(0, 247, 255, 0.4); 
             overflow: hidden;
             backdrop-filter: blur(5px);
+            transition: transform 0.3s;
         }
+        /* Clase para ocultar tarjetas que no coinciden */
+        .hidden { display: none; }
+
         .cubrir { 
             width: 100%; 
             aspect-ratio: 1/1; 
@@ -95,7 +123,12 @@
         <h2>DJ PSICOSIS</h2>
     </div>
 
-    <!-- 1. JULIITO (NUEVA - ARRIBA) -->
+    <!-- BUSCADOR -->
+    <div class="contenedor-buscador">
+        <input type="text" id="buscador" placeholder="Buscar canción o artista...">
+    </div>
+
+    <!-- TARJETAS -->
     <div class="tarjeta">
         <img src="https://ia902806.us.archive.org/16/items/j1_20260502/kilo.jpg" class="cubrir">
         <h3>Juliito - K.i.L.O</h3>
@@ -103,7 +136,6 @@
         <a href="https://ia902806.us.archive.org/16/items/j1_20260502/Juliito%20-%20K.i.L.O.mp3" class="boton-de-descarga" download>Descargar MP3</a>
     </div>
 
-    <!-- 2. LA BELLA LUZ (ANTERIOR - DEBAJO) -->
     <div class="tarjeta">
         <img src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/coqueta%20-%20la%20bella%20luz.jpg" class="cubrir">
         <h3>COQUETA - LA BELLA LUZ</h3>
@@ -111,6 +143,22 @@
         <a href="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3" class="boton-de-descarga" download>Descargar MP3</a>
     </div>
 
+    <!-- JAVASCRIPT PARA EL FILTRO -->
+    <script>
+        document.getElementById('buscador').addEventListener('keyup', function(e) {
+            let texto = e.target.value.toLowerCase();
+            let tarjetas = document.querySelectorAll('.tarjeta');
+
+            tarjetas.forEach(tarjeta => {
+                let titulo = tarjeta.querySelector('h3').innerText.toLowerCase();
+                if (titulo.includes(texto)) {
+                    tarjeta.classList.remove('hidden');
+                } else {
+                    tarjeta.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+
 </body>
 </html>
-
