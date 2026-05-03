@@ -44,7 +44,6 @@
             letter-spacing: 2px;
         }
 
-        /* --- ESTILO DEL BUSCADOR --- */
         .contenedor-buscador {
             width: 100%;
             display: flex;
@@ -121,30 +120,9 @@
         <input type="text" id="buscador" placeholder="Buscar canción o artista...">
     </div>
 
-    <!-- TARJETA 1 -->
-    <div class="tarjeta">
-        <img src="https://ia902806.us.archive.org/16/items/j1_20260502/kilo.jpg" class="cubrir">
-        <h3>Juliito - K.i.L.O</h3>
-        <audio controls src="https://ia902806.us.archive.org/16/items/j1_20260502/Juliito%20-%20K.i.L.O.mp3"></audio>
-        <a href="https://ia902806.us.archive.org/16/items/j1_20260502/Juliito%20-%20K.i.L.O.mp3" class="boton-de-descarga" download>Descargar MP3</a>
-    </div>
+    <!-- AQUÍ EMPIEZAN LAS TARJETAS (NUEVAS ARRIBA) -->
 
-    <!-- TARJETA 2 -->
-    <div class="tarjeta">
-        <img src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/coqueta%20-%20la%20bella%20luz.jpg" class="cubrir">
-        <h3>COQUETA - LA BELLA LUZ</h3>
-        <audio controls src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3"></audio>
-        <a href="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3" class="boton-de-descarga" download>Descargar MP3</a>
-    </div>
-        <!-- TARJETA: MALUMA - QHP PIÑATA -->
-    <div class="tarjeta">
-        <img src="https://dn721808.ca.archive.org/0/items/maluma-qhp-pin-ata/cover.jpg" class="cubrir" alt="Carátula Maluma">
-        <h3>Maluma - QHP PIÑATA</h3>
-        <audio controls src="https://ia801906.us.archive.org/5/items/maluma-qhp-pin-ata/Maluma%20-%20QHP%20PI%C3%91ATA.mp3"></audio>
-        <a href="https://ia801906.us.archive.org/5/items/maluma-qhp-pin-ata/Maluma%20-%20QHP%20PI%C3%91ATA.mp3" class="boton-de-descarga" download>Descargar MP3</a>
-    </div>
-
-        <!-- TARJETA: TOKISHA -->
+    <!-- 1. LO MÁS NUEVO: TOKISHA -->
     <div class="tarjeta">
         <img src="https://dn710209.ca.archive.org/0/items/los-de-la-pina-totoy-el-frio-tokisha/cover.jpg" class="cubrir" alt="Carátula Tokisha">
         <h3>Los De La Piña, Totoy El Frio - TOKISHA</h3>
@@ -152,36 +130,51 @@
         <a href="https://dn710209.ca.archive.org/0/items/los-de-la-pina-totoy-el-frio-tokisha/LosDeLaPi%C3%B1a%2C%20Totoy%20El%20Frio%20-%20TOKISHA.mp3" class="boton-de-descarga" download>Descargar MP3</a>
     </div>
 
+    <!-- 2. NUEVO: MALUMA -->
+    <div class="tarjeta">
+        <img src="https://dn721808.ca.archive.org/0/items/maluma-qhp-pin-ata/cover.jpg" class="cubrir" alt="Carátula Maluma">
+        <h3>Maluma - QHP PIÑATA</h3>
+        <audio controls src="https://ia801906.us.archive.org/5/items/maluma-qhp-pin-ata/Maluma%20-%20QHP%20PI%C3%91ATA.mp3"></audio>
+        <a href="https://ia801906.us.archive.org/5/items/maluma-qhp-pin-ata/Maluma%20-%20QHP%20PI%C3%91ATA.mp3" class="boton-de-descarga" download>Descargar MP3</a>
+    </div>
 
+    <!-- 3. ANTERIOR: JULIITO -->
+    <div class="tarjeta">
+        <img src="https://ia902806.us.archive.org/16/items/j1_20260502/kilo.jpg" class="cubrir">
+        <h3>Juliito - K.i.L.O</h3>
+        <audio controls src="https://ia902806.us.archive.org/16/items/j1_20260502/Juliito%20-%20K.i.L.O.mp3"></audio>
+        <a href="https://ia902806.us.archive.org/16/items/j1_20260502/Juliito%20-%20K.i.L.O.mp3" class="boton-de-descarga" download>Descargar MP3</a>
+    </div>
+
+    <!-- 4. ANTERIOR: LA BELLA LUZ -->
+    <div class="tarjeta">
+        <img src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/coqueta%20-%20la%20bella%20luz.jpg" class="cubrir">
+        <h3>COQUETA - LA BELLA LUZ</h3>
+        <audio controls src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3"></audio>
+        <a href="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3" class="boton-de-descarga" download>Descargar MP3</a>
+    </div>
 
     <script>
-        // --- LÓGICA DEL BUSCADOR ---
         document.getElementById('buscador').addEventListener('keyup', function(e) {
             let texto = e.target.value.toLowerCase();
             let tarjetas = document.querySelectorAll('.tarjeta');
-
             tarjetas.forEach(tarjeta => {
                 let titulo = tarjeta.querySelector('h3').innerText.toLowerCase();
                 tarjeta.classList.toggle('hidden', !titulo.includes(texto));
             });
         });
 
-        // --- LÓGICA PARA REPRODUCIR SOLO UNO ---
         const todosLosAudios = document.querySelectorAll('audio');
-
         todosLosAudios.forEach(audioActual => {
             audioActual.addEventListener('play', () => {
-                // Cuando uno empieza, pausamos y reiniciamos los demás
                 todosLosAudios.forEach(otroAudio => {
                     if (otroAudio !== audioActual) {
                         otroAudio.pause();
-                        otroAudio.currentTime = 0; // Esto lo reinicia al principio
+                        otroAudio.currentTime = 0;
                     }
                 });
             });
         });
     </script>
-
 </body>
 </html>
-
