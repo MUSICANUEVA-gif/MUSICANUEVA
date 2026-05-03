@@ -1,5 +1,4 @@
-
-Put your HTML text here<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -65,9 +64,6 @@ Put your HTML text here<!DOCTYPE html>
             text-align: center;
             box-shadow: 0 0 10px rgba(0, 247, 255, 0.2);
         }
-        #buscador::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
 
         .tarjeta { 
             background: rgba(0, 0, 0, 0.85); 
@@ -80,9 +76,7 @@ Put your HTML text here<!DOCTYPE html>
             box-shadow: 0 0 15px rgba(0, 247, 255, 0.4); 
             overflow: hidden;
             backdrop-filter: blur(5px);
-            transition: transform 0.3s;
         }
-        /* Clase para ocultar tarjetas que no coinciden */
         .hidden { display: none; }
 
         .cubrir { 
@@ -123,12 +117,11 @@ Put your HTML text here<!DOCTYPE html>
         <h2>DJ PSICOSIS</h2>
     </div>
 
-    <!-- BUSCADOR -->
     <div class="contenedor-buscador">
         <input type="text" id="buscador" placeholder="Buscar canción o artista...">
     </div>
 
-    <!-- TARJETAS -->
+    <!-- TARJETA 1 -->
     <div class="tarjeta">
         <img src="https://ia902806.us.archive.org/16/items/j1_20260502/kilo.jpg" class="cubrir">
         <h3>Juliito - K.i.L.O</h3>
@@ -136,6 +129,7 @@ Put your HTML text here<!DOCTYPE html>
         <a href="https://ia902806.us.archive.org/16/items/j1_20260502/Juliito%20-%20K.i.L.O.mp3" class="boton-de-descarga" download>Descargar MP3</a>
     </div>
 
+    <!-- TARJETA 2 -->
     <div class="tarjeta">
         <img src="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/coqueta%20-%20la%20bella%20luz.jpg" class="cubrir">
         <h3>COQUETA - LA BELLA LUZ</h3>
@@ -143,22 +137,34 @@ Put your HTML text here<!DOCTYPE html>
         <a href="https://dn710406.ca.archive.org/0/items/la-bella-luz-coqueta/La%20bella%20luz%20-%20Coqueta.mp3" class="boton-de-descarga" download>Descargar MP3</a>
     </div>
 
-    <!-- JAVASCRIPT PARA EL FILTRO -->
     <script>
+        // --- LÓGICA DEL BUSCADOR ---
         document.getElementById('buscador').addEventListener('keyup', function(e) {
             let texto = e.target.value.toLowerCase();
             let tarjetas = document.querySelectorAll('.tarjeta');
 
             tarjetas.forEach(tarjeta => {
                 let titulo = tarjeta.querySelector('h3').innerText.toLowerCase();
-                if (titulo.includes(texto)) {
-                    tarjeta.classList.remove('hidden');
-                } else {
-                    tarjeta.classList.add('hidden');
-                }
+                tarjeta.classList.toggle('hidden', !titulo.includes(texto));
+            });
+        });
+
+        // --- LÓGICA PARA REPRODUCIR SOLO UNO ---
+        const todosLosAudios = document.querySelectorAll('audio');
+
+        todosLosAudios.forEach(audioActual => {
+            audioActual.addEventListener('play', () => {
+                // Cuando uno empieza, pausamos y reiniciamos los demás
+                todosLosAudios.forEach(otroAudio => {
+                    if (otroAudio !== audioActual) {
+                        otroAudio.pause();
+                        otroAudio.currentTime = 0; // Esto lo reinicia al principio
+                    }
+                });
             });
         });
     </script>
 
 </body>
 </html>
+
