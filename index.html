@@ -98,3 +98,36 @@
     </script>
 </body>
 </html>
+<script>
+        // Asegúrate de que los nombres coincidan exactamente con los archivos en tu carpeta
+        const canciones = [
+            "JAAZI L - LA VIDA E' 1 SOLA (Visualizador Oficial) MISIÓN.mp3"
+        ];
+
+        const lista = document.getElementById('contenedor-musica');
+
+        canciones.forEach(nombreArchivo => {
+            const titulo = nombreArchivo.replace('.mp3', '');
+            
+            // Usamos encodeURIComponent para que la tilde de la carpeta "música" no rompa el link
+            const rutaCarpeta = "música"; 
+            
+            lista.innerHTML += `
+                <div class="tarjeta">
+                    <img src="fondo.jpg" class="cubrir">
+                    <h3>${titulo}</h3>
+                    <audio controls src="${rutaCarpeta}/${nombreArchivo}"></audio>
+                    <a href="${rutaCarpeta}/${nombreArchivo}" class="boton-de-descarga" download>Descargar MP3</a>
+                </div>
+            `;
+        });
+
+        // Buscador
+        document.getElementById('buscador').addEventListener('keyup', (e) => {
+            let texto = e.target.value.toLowerCase();
+            document.querySelectorAll('.tarjeta').forEach(t => {
+                let titulo = t.querySelector('h3').innerText.toLowerCase();
+                t.classList.toggle('hidden', !titulo.includes(texto));
+            });
+        });
+    </script>
