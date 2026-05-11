@@ -15,6 +15,7 @@
         .header-principal { width: 100%; text-align: center; margin-bottom: 10px; }
         .header-principal h1 { color: #00f7ff; text-shadow: 0 0 10px #00f7ff; font-size: 2rem; text-transform: uppercase; margin-bottom: 5px; }
         .header-principal h2 { color: #00f7ff; text-shadow: 0 0 10px #00f7ff; font-size: 1.5rem; text-transform: uppercase; margin-top: 0; letter-spacing: 2px; }
+        
         .contenedor-buscador { width: 100%; display: flex; justify-content: center; margin-bottom: 30px; }
         #buscador { width: 90%; max-width: 400px; padding: 12px 20px; border-radius: 25px; border: 2px solid #00f7ff; background: rgba(0, 0, 0, 0.6); color: white; font-size: 1rem; outline: none; text-align: center; box-shadow: 0 0 10px rgba(0, 247, 255, 0.2); }
         
@@ -46,36 +47,35 @@
         <input type="text" id="buscador" placeholder="Buscar canción o artista...">
     </div>
 
-    <?php
-    $directorio = 'musica/';
-    $archivos = scandir($directorio);
-    // Ordenar por fecha de modificación (las más nuevas primero)
-    array_multisort(array_map('filemtime', array_map(function($archivo) use ($directorio) {
-        return $directorio . $archivo;
-    }, $archivos)), SORT_DESC, $archivos);
-
-    foreach ($archivos as $archivo) {
-        if (pathinfo($archivo, PATHINFO_EXTENSION) == 'mp3') {
-            $nombreLimpio = pathinfo($archivo, PATHINFO_FILENAME);
-            // Reemplaza guiones por espacios para el título
-            $tituloMostrado = str_replace(['-', '_'], ' ', $nombreLimpio);
-            
-            // Intentar buscar una imagen con el mismo nombre, si no usar una por defecto
-            $portada = "portadas/" . $nombreLimpio . ".jpg";
-            if (!file_exists($portada)) { $portada = "fondo.jpg"; } 
-            
-            echo '
-            <div class="tarjeta">
-                <img src="'.$portada.'" class="cubrir" alt="Portada">
-                <h3>'.$tituloMostrado.'</h3>
-                <audio controls src="'.$directorio . $archivo.'"></audio>
-                <a href="'.$directorio . $archivo.'" class="boton-de-descarga" download>Descargar MP3</a>
-            </div>';
-        }
-    }
-    ?>
+    <div id="contenedor-musica" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; width: 100%;">
+        </div>
 
     <script>
+        // === LISTA DE CANCIONES (Agrega el nombre exacto de tus archivos aquí) ===
+        const canciones = [
+            "JAAZI L - LA VIDA E' 1 SOLA (Visualizador Oficial) MISIÓN.mp3",
+            "Papa Jeison - Malianteo.mp3",
+            "Megadivo Produce - Shorty.mp3",
+            "Shorty.mp3",
+            "Puyalo Pantera - Etel.mp3",
+            "Pequeño Homie - A 200.mp3",
+            "Ezzy R - PANTI Y COLALE 2.0.mp3"
+        ];
+
+        const lista = document.getElementById('contenedor-musica');
+
+        canciones.forEach(nombreArchivo => {
+            const titulo = nombreArchivo.replace('.mp3', '').replace(/-/g, ' ').replace(/_/g, ' ');
+            lista.innerHTML += `
+                <div class="tarjeta">
+                    <img src="fondo.jpg" class="cubrir" alt="Portada">
+                    <h3>${titulo}</h3>
+                    <audio controls src="música/${nombreArchivo}"></audio>
+                    <a href="música/${nombreArchivo}" class="boton-de-descarga" download="${nombreArchivo}">Descargar MP3</a>
+                </div>
+            `;
+        });
+
         // Buscador funcional
         document.getElementById('buscador').addEventListener('keyup', function(e) {
             let texto = e.target.value.toLowerCase();
