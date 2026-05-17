@@ -70,6 +70,33 @@
             const [inputUrl, setInputUrl] = useState("");
             const audioRef = useRef(null);
 
+            // --- NUEVO: ESTADOS DE ADMINISTRADOR ---
+            const [isAdmin, setIsAdmin] = useState(false);
+
+            // Verificar si ya somos admin al recargar la página
+            useEffect(() => {
+                if (localStorage.getItem('psicosis_admin') === 'true') {
+                    setIsAdmin(true);
+                }
+            }, []);
+
+            // Función ultra segura y sin fallos: 1 solo clic en el icono secreto
+            const handleAdminAccess = () => {
+                if (isAdmin) return;
+                
+                const pwd = window.prompt("ACCESO RESTRINGIDO. Clave de creador:");
+                if (pwd === "psicosis") {
+                    setIsAdmin(true);
+                    localStorage.setItem('psicosis_admin', 'true');
+                    setErrorMessage("¡Modo Administrador Desbloqueado! 🔓");
+                    setTimeout(() => setErrorMessage(""), 4000);
+                } else if (pwd !== null) {
+                    setErrorMessage("Clave incorrecta ❌");
+                    setTimeout(() => setErrorMessage(""), 3000);
+                }
+            };
+            // ----------------------------------------
+
             // Lista de reproducción dinámica
             const [playlist, setPlaylist] = useState([
                 {
@@ -238,8 +265,11 @@
                         <div className="w-full md:w-1/2 p-8 flex flex-col items-center justify-between border-b md:border-b-0 md:border-r border-white/10 relative">
                             
                             <div className="w-full flex justify-between items-center mb-8">
-                                <h1 className="text-xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 uppercase flex items-center gap-2">
-                                    <Disc3 className="text-cyan-400" />
+                                {/* Título normal, el truco ahora está SÓLO en el icono del disco */}
+                                <h1 className="text-xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 uppercase flex items-center gap-2 select-none">
+                                    <div onClick={handleAdminAccess} className="cursor-pointer hover:scale-110 transition-transform">
+                                        <Disc3 className="text-cyan-400" />
+                                    </div>
                                     Psicosis
                                 </h1>
                                 <button onClick={handleDownload} className="bg-white/10 hover:bg-cyan-500 hover:text-black transition-all p-2 rounded-full border border-white/10 hover:border-cyan-500 hover:shadow-[0_0_15px_rgba(34,211,238,0.6)]" title="Descargar Audio">
@@ -296,28 +326,31 @@
 
                         <div className="w-full md:w-1/2 p-6 flex flex-col bg-black/40">
                             
-                            <form onSubmit={handleAddTrack} className="mb-6">
-                                <label className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                    <LinkIcon size={14} /> Inyectar URL de Audio
-                                </label>
-                                <div className="flex gap-2">
-                                    <input 
-                                        type="url" 
-                                        placeholder="Pega el enlace MP3 aquí..." 
-                                        value={inputUrl}
-                                        onChange={(e) => setInputUrl(e.target.value)}
-                                        className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-fuchsia-500 focus:bg-white/10 transition-colors placeholder:text-neutral-600"
-                                        required
-                                    />
-                                    <button 
-                                        type="submit" 
-                                        className="bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-4 py-3 rounded-lg font-bold transition-colors flex items-center justify-center"
-                                        title="Añadir Track"
-                                    >
-                                        <Plus size={20} />
-                                    </button>
-                                </div>
-                            </form>
+                            {/* EL INYECTOR SOLO SE MUESTRA SI ERES ADMIN */}
+                            {isAdmin && (
+                                <form onSubmit={handleAddTrack} className="mb-6">
+                                    <label className="text-xs font-bold text-fuchsia-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                        <LinkIcon size={14} /> Modo Creador: Inyectar URL
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input 
+                                            type="url" 
+                                            placeholder="Pega el enlace MP3 aquí..." 
+                                            value={inputUrl}
+                                            onChange={(e) => setInputUrl(e.target.value)}
+                                            className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-fuchsia-500 focus:bg-white/10 transition-colors placeholder:text-neutral-600"
+                                            required
+                                        />
+                                        <button 
+                                            type="submit" 
+                                            className="bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-4 py-3 rounded-lg font-bold transition-colors flex items-center justify-center"
+                                            title="Añadir Track"
+                                        >
+                                            <Plus size={20} />
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
 
                             <div className="flex items-center gap-3 bg-white/5 p-3 rounded-lg mb-6 border border-white/5">
                                 <button onClick={toggleMute} className="text-neutral-400 hover:text-white transition-colors">
@@ -371,13 +404,16 @@
                                                 </span>
                                             </div>
 
-                                            <button 
-                                                onClick={(e) => removeTrack(index, e)}
-                                                className="p-2 text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
-                                                title="Eliminar"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
+                                            {/* BOTON ELIMINAR SOLO VISIBLE PARA ADMIN */}
+                                            {isAdmin && (
+                                                <button 
+                                                    onClick={(e) => removeTrack(index, e)}
+                                                    className="p-2 text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                                                    title="Eliminar"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            )}
                                         </div>
                                     );
                                 })}
