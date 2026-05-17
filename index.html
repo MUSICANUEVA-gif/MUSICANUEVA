@@ -171,7 +171,15 @@
             // Estados del reproductor y base de datos
             const [isBuffering, setIsBuffering] = useState(false);
             const [resolvedAudioSrc, setResolvedAudioSrc] = useState("");
-            const [playlist, setPlaylist] = useState([]);
+            const [cloudSongs, setCloudSongs] = useState([]);
+            const [deletedDefaultIds, setDeletedDefaultIds] = useState(() => {
+                try {
+                    const saved = localStorage.getItem('psicosis_deleted_defaults');
+                    return saved ? JSON.parse(saved) : [];
+                } catch (e) {
+                    return [];
+                }
+            });
             const [user, setUser] = useState(null);
             const [db, setDb] = useState(null);
             const [auth, setAuth] = useState(null);
@@ -204,7 +212,7 @@
                 }
             ];
 
-            // 1. Cargar Firebase de forma Dinámica (Evita que la web muera con pantalla negra si no está en Sandbox)
+            // 1. Cargar Firebase de forma Dinámica o Modo Local de Respaldo
             useEffect(() => {
                 const loadFirebase = async () => {
                     try {
@@ -251,12 +259,14 @@
                     const savedSongs = localStorage.getItem('psicosis_local_songs');
                     if (savedSongs) {
                         try {
-                            setPlaylist([...defaultSongs, ...JSON.parse(savedSongs)]);
+                            const parsedSongs = JSON.parse(savedSongs).map((track, idx) => ({
+                                ...track,
+                                id: track.id || `local_song_${idx}_${Date.now()}` // ID defensivo
+                            }));
+                            setCloudSongs(parsedSongs);
                         } catch (e) {
-                            setPlaylist(defaultSongs);
+                            setCloudSongs([]);
                         }
-                    } else {
-                        setPlaylist(defaultSongs);
                     }
                     if (localStorage.getItem('psicosis_admin') === 'true') {
                         setIsAdmin(true);
@@ -297,39 +307,61 @@
             // 3. Cargar canciones en Tiempo Real (Desde Firestore o LocalStorage de respaldo)
             useEffect(() => {
                 if (!firebaseReady || !db || !user) {
-                    // Si corre en GitHub Pages directo del usuario, lee de LocalStorage para guardar sus tracks gratis
+                    // Si corre en GitHub Pages directo del usuario, lee de LocalStorage
                     const savedSongs = localStorage.getItem('psicosis_local_songs');
                     if (savedSongs) {
                         try {
-                            setPlaylist([...defaultSongs, ...JSON.parse(savedSongs)]);
+                            const parsedSongs = JSON.parse(savedSongs).map((track, idx) => ({
+                                ...track,
+                                id: track.id || `local_song_${idx}_${Date.now()}` // ID defensivo
+                            }));
+                            setCloudSongs(parsedSongs);
                         } catch (e) {
-                            setPlaylist(defaultSongs);
+                            setCloudSongs([]);
                         }
-                    } else {
-                        setPlaylist(defaultSongs);
                     }
                     return;
                 }
 
-                const { collection, onSnapshot } = window.firebaseMethods;
+                const { collection, onSnapshot, doc } = window.firebaseMethods;
                 const songsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'songs');
+                const settingsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'deleted_defaults');
                 
-                const unsubscribe = onSnapshot(songsColRef, (snapshot) => {
-                    const cloudSongs = [];
+                // Escuchar canciones de la nube
+                const unsubscribeSongs = onSnapshot(songsColRef, (snapshot) => {
+                    const cloudSongsList = [];
                     snapshot.forEach((doc) => {
-                        cloudSongs.push(doc.data());
+                        const data = doc.data();
+                        cloudSongsList.push({
+                            ...data,
+                            id: data.id || doc.id
+                        });
                     });
-                    
-                    cloudSongs.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-                    setPlaylist([...defaultSongs, ...cloudSongs]);
+                    cloudSongsList.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+                    setCloudSongs(cloudSongsList);
                 }, (error) => {
-                    console.error("Error de snapshot Firestore:", error);
+                    console.error("Error de snapshot Firestore canciones:", error);
+                });
+
+                // Escuchar preferencias de eliminados por defecto
+                const unsubscribeSettings = onSnapshot(settingsDocRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        setDeletedDefaultIds(docSnap.data().ids || []);
+                    }
+                }, (error) => {
+                    console.error("Error cargando configuración desde Firebase:", error);
                 });
                 
-                return () => unsubscribe();
+                return () => {
+                    unsubscribeSongs();
+                    unsubscribeSettings();
+                };
             }, [firebaseReady, db, user]);
 
-            // Definir currentTrack de forma global dentro de App para evitar ReferenceError
+            // --- ESTADO DERIVADO DE REPRODUCCIÓN (Evita ReferenceError y sincroniza automáticamente) ---
+            const visibleDefaults = defaultSongs.filter(s => !deletedDefaultIds.includes(s.id));
+            const playlist = [...visibleDefaults, ...cloudSongs];
+
             const currentTrack = playlist[currentTrackIndex];
             const coverSrc = currentTrack?.cover || "";
             const fallbackCover = "https://placehold.co/600x600/03000a/c026d3?text=PSICOSIS+NEON";
@@ -495,10 +527,9 @@
                     }
                 } else {
                     // Modo Local: Guardar en LocalStorage
-                    const currentCloudSongs = playlist.filter(track => !track.id.startsWith("default_"));
-                    const updatedSongs = [...currentCloudSongs, newTrack];
+                    const updatedSongs = [...cloudSongs, newTrack];
                     localStorage.setItem('psicosis_local_songs', JSON.stringify(updatedSongs));
-                    setPlaylist([...defaultSongs, ...updatedSongs]);
+                    setCloudSongs(updatedSongs);
                     setErrorMessage("¡Canción y Carátula guardadas en tu navegador local! 🎉🔥");
                 }
 
@@ -509,32 +540,49 @@
             const removeTrack = async (index, e) => {
                 e.stopPropagation();
                 const trackToDelete = playlist[index];
+                if (!trackToDelete) return;
                 
-                if (trackToDelete.id.startsWith("default_")) {
-                    setErrorMessage("No puedes eliminar pistas por defecto.");
-                    setTimeout(() => setErrorMessage(""), 3000);
-                    return;
-                }
-                
+                const trackId = trackToDelete.id || '';
                 setErrorMessage("Eliminando canción... 🗑️");
                 
-                if (firebaseEnabled && db && user) {
-                    // Eliminar de Firebase
-                    const { doc, deleteDoc } = window.firebaseMethods;
-                    try {
-                        const songDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'songs', trackToDelete.id);
-                        await deleteDoc(songDocRef);
-                        setErrorMessage("¡Track eliminado permanentemente de la nube! ✅");
-                    } catch (err) {
-                        console.error("Error eliminando track en Firestore:", err);
-                        setErrorMessage("Fallo al borrar en la nube ❌");
+                if (trackId.startsWith("default_")) {
+                    // Canción por defecto: Guardar en la nube o local que ha sido eliminada por el creador
+                    const updatedDeleted = [...deletedDefaultIds, trackId];
+                    if (firebaseEnabled && db && user) {
+                        const { doc, setDoc } = window.firebaseMethods;
+                        try {
+                            const settingsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'deleted_defaults');
+                            await setDoc(settingsDocRef, { ids: updatedDeleted });
+                            setErrorMessage("¡Pista predeterminada eliminada con éxito! ✅");
+                        } catch (err) {
+                            console.error("Error al guardar preferencia de eliminados en Firestore:", err);
+                            setErrorMessage("Fallo al borrar en la nube ❌");
+                        }
+                    } else {
+                        localStorage.setItem('psicosis_deleted_defaults', JSON.stringify(updatedDeleted));
+                        setDeletedDefaultIds(updatedDeleted);
+                        setErrorMessage("¡Pista predeterminada eliminada localmente! ✅");
                     }
                 } else {
-                    // Eliminar de LocalStorage
-                    const updatedLocalSongs = playlist.filter(track => !track.id.startsWith("default_") && track.id !== trackToDelete.id);
-                    localStorage.setItem('psicosis_local_songs', JSON.stringify(updatedLocalSongs));
-                    setPlaylist([...defaultSongs, ...updatedLocalSongs]);
-                    setErrorMessage("¡Track eliminado localmente de tu navegador! ✅");
+                    // Canción inyectada por el usuario
+                    if (firebaseEnabled && db && user) {
+                        // Eliminar de Firebase
+                        const { doc, deleteDoc } = window.firebaseMethods;
+                        try {
+                            const songDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'songs', trackId);
+                            await deleteDoc(songDocRef);
+                            setErrorMessage("¡Track eliminado permanentemente de la nube! ✅");
+                        } catch (err) {
+                            console.error("Error eliminando track en Firestore:", err);
+                            setErrorMessage("Fallo al borrar en la nube ❌");
+                        }
+                    } else {
+                        // Eliminar de LocalStorage
+                        const updatedLocalSongs = cloudSongs.filter(track => track.id !== trackId);
+                        localStorage.setItem('psicosis_local_songs', JSON.stringify(updatedLocalSongs));
+                        setCloudSongs(updatedLocalSongs);
+                        setErrorMessage("¡Track eliminado localmente de tu navegador! ✅");
+                    }
                 }
 
                 if (currentTrackIndex === index) {
@@ -843,6 +891,10 @@
                                 />
                             </div>
 
+                            <h3 className="text-sm font-black uppercase tracking-widest text-cyan-400 mb-4 flex items-center gap-2 neon-text-cyan">
+                                <MusicIcon size={16} /> Cola de Reproducción
+                            </h3>
+
                             {/* Buscador de canciones con Glow Cian */}
                             <div className="relative mb-6">
                                 <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-500" size={16} />
@@ -867,7 +919,7 @@
                                     const isActive = currentTrackIndex === track.originalIndex;
                                     return (
                                         <div 
-                                            key={track.originalIndex} 
+                                            key={track.id} 
                                             onClick={() => playTrack(track.originalIndex)}
                                             className={`group relative flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-all border ${
                                                 isActive 
@@ -893,7 +945,7 @@
                                             
                                             <div className="flex flex-col flex-1 min-w-0">
                                                 <span className={`font-bold uppercase truncate text-sm tracking-wider ${isActive ? 'text-cyan-400 neon-text-cyan' : 'text-neutral-200'}`}>
-                                                    {track.title} {!track.id.startsWith("default_") && <span className="text-[9px] text-fuchsia-400 border border-fuchsia-500/30 px-1 rounded ml-1 lowercase tracking-normal">cloud</span>}
+                                                    {track.title} {!(track.id || '').startsWith("default_") && <span className="text-[9px] text-fuchsia-400 border border-fuchsia-500/30 px-1 rounded ml-1 lowercase tracking-normal">cloud</span>}
                                                 </span>
                                                 <span className="text-xs text-neutral-500 uppercase tracking-widest truncate">
                                                     {track.artist}
