@@ -366,11 +366,27 @@
             const coverSrc = currentTrack?.cover || "";
             const fallbackCover = "https://placehold.co/600x600/03000a/c026d3?text=PSICOSIS+NEON";
 
-            // 4. Cambiar pista de reproducción
+            // 4. Cambiar pista de reproducción y forzar recarga/reproducción
             useEffect(() => {
                 if (!currentTrack) return;
                 setResolvedAudioSrc(currentTrack.src);
             }, [currentTrackIndex, playlist]);
+
+            // Control de reproducción automática al cambiar la fuente resuelta de audio
+            useEffect(() => {
+                if (audioRef.current && resolvedAudioSrc) {
+                    audioRef.current.load(); // Forzamos al elemento audio a recargar desde cero con el nuevo src limpio
+                    if (isPlaying) {
+                        const playPromise = audioRef.current.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(e => {
+                                console.error("Error de autoplay bloqueado por el navegador:", e);
+                                setIsPlaying(false);
+                            });
+                        }
+                    }
+                }
+            }, [resolvedAudioSrc]);
 
             // Función para acceder al Modo Creador
             const handleAdminAccess = () => {
@@ -394,7 +410,7 @@
                 }
             };
 
-            // --- Extracción de metadatos y carátula directamente de la URL ---
+            // --- Extracción de metadatos y carátula directamente de la URL con anti-cacheo ---
             const handleAddTrack = async (e) => {
                 e.preventDefault();
                 const urlToAdd = inputUrl.trim();
@@ -421,8 +437,13 @@
                 let finalCover = fallbackCover;
 
                 try {
-                    // 1. Descargamos únicamente el inicio del archivo usando un stream de lectura directo (evita CORS)
-                    const response = await fetch(urlToAdd);
+                    // Evitamos que el navegador guarde en caché el archivo incompleto (de 1.5MB)
+                    // agregando un parámetro dinámico e inofensivo al hacer el fetch de metadatos.
+                    // De esta forma, la URL original del audio permanece 100% limpia para el tag <audio>
+                    const bypassUrl = urlToAdd + (urlToAdd.includes('?') ? '&' : '?') + '_psicosis_id3_bypass=' + Date.now();
+
+                    // 1. Descargamos únicamente el inicio del archivo usando un stream de lectura directo
+                    const response = await fetch(bypassUrl);
                     if (!response.ok) throw new Error("Fallo al conectarse con el servidor de audio");
 
                     const reader = response.body.getReader();
