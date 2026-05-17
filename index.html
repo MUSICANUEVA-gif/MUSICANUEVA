@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Psicosis Music</title>
+    <title>Psicosis Music - Neon Cyberpunk</title>
     
     <!-- Tailwind CSS para los estilos -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,7 +15,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
 
     <style>
-        body { margin: 0; padding: 0; background-color: #020617; } /* slate-950 */
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background-color: #03000a; 
+        }
+        
+        /* Animaciones Neón personalizadas */
         .animate-spin-slow {
             animation: spin 8s linear infinite;
         }
@@ -23,32 +29,70 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
+
+        /* Sombras de Brillo Neón (Neon Glows) */
+        .neon-shadow-cyan {
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4), inset 0 0 10px rgba(6, 182, 212, 0.2);
+        }
+        .neon-shadow-fuchsia {
+            box-shadow: 0 0 15px rgba(217, 70, 239, 0.4), inset 0 0 10px rgba(217, 70, 239, 0.2);
+        }
+        .neon-shadow-green {
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4), inset 0 0 10px rgba(34, 197, 94, 0.2);
+        }
+        
+        .neon-glow-btn {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
+            transition: all 0.3s ease;
+        }
+        .neon-glow-btn:hover {
+            box-shadow: 0 0 35px rgba(217, 70, 239, 0.8);
+            transform: scale(1.05);
+        }
+
+        /* Textos con brillo de luz */
+        .neon-text-cyan {
+            text-shadow: 0 0 8px rgba(6, 182, 212, 0.8), 0 0 20px rgba(6, 182, 212, 0.3);
+        }
+        .neon-text-fuchsia {
+            text-shadow: 0 0 8px rgba(217, 70, 239, 0.8), 0 0 20px rgba(217, 70, 239, 0.3);
+        }
+        .neon-text-green {
+            text-shadow: 0 0 8px rgba(34, 197, 94, 0.8), 0 0 20px rgba(34, 197, 94, 0.3);
+        }
+
+        /* Scrollbar Neón */
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.2);
+            background: rgba(3, 0, 10, 0.6);
             border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(217, 70, 239, 0.2);
             border-radius: 10px;
+            border: 1px solid rgba(6, 182, 212, 0.2);
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(34, 211, 238, 0.5);
+            background-color: rgba(6, 182, 212, 0.6);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
         }
+
+        /* Custom Slider Neón */
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 12px;
-            width: 12px;
+            height: 14px;
+            width: 14px;
             border-radius: 50%;
-            background: currentColor;
+            background: #ffffff;
             cursor: pointer;
-            box-shadow: 0 0 10px currentColor;
+            box-shadow: 0 0 12px currentColor;
+            border: 2px solid #03000a;
         }
     </style>
 </head>
-<body class="bg-slate-950 text-neutral-200">
+<body class="bg-[#03000a] text-neutral-200">
     
     <!-- Contenedor donde React inyectará la aplicación -->
     <div id="root"></div>
@@ -59,8 +103,23 @@
         import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
         import { 
             Play, Pause, SkipForward, SkipBack, Volume2, VolumeX,
-            Download, Plus, Link as LinkIcon, Music, Disc3, Zap, Trash2, Search
+            Download, Plus, Link as LinkIcon, Music, Disc3, Zap, Trash2, Search, X
         } from 'https://esm.sh/lucide-react@0.294.0?deps=react@18.2.0';
+
+        // Importación de Firebase para almacenamiento ilimitado y gratuito en Firestore
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+        // Inicialización de variables globales con fallbacks defensivos
+        const configStr = typeof __firebase_config !== 'undefined' 
+            ? __firebase_config 
+            : '{"apiKey":"","authDomain":"","projectId":"","storageBucket":"","messagingSenderId":"","appId":""}';
+        const firebaseConfig = JSON.parse(configStr);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
         function App() {
             const [isPlaying, setIsPlaying] = useState(false);
@@ -72,67 +131,132 @@
             const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
             const [inputUrl, setInputUrl] = useState("");
             const [searchTerm, setSearchTerm] = useState("");
+            
+            // Estados para el reproductor en la nube
+            const [isBuffering, setIsBuffering] = useState(false);
+            const [resolvedAudioSrc, setResolvedAudioSrc] = useState("");
+            
+            // Lista de reproducción dinámica que combina locales con nube
+            const [playlist, setPlaylist] = useState([]);
+            const [user, setUser] = useState(null);
+
             const audioRef = useRef(null);
 
             // --- ESTADOS DE ADMINISTRADOR ---
             const [isAdmin, setIsAdmin] = useState(false);
+            const [showAdminModal, setShowAdminModal] = useState(false);
+            const [adminPasswordInput, setAdminPasswordInput] = useState("");
 
-            // Verificar si ya somos admin al recargar la página
+            // 1. Inicialización de Autenticación antes de cualquier consulta (RULE 3)
             useEffect(() => {
-                if (localStorage.getItem('psicosis_admin') === 'true') {
-                    setIsAdmin(true);
-                }
+                const initAuth = async () => {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (err) {
+                        console.error("Error en autenticación Firebase:", err);
+                    }
+                };
+                initAuth();
+                
+                const unsubscribe = onAuthStateChanged(auth, (usr) => {
+                    setUser(usr);
+                    if (localStorage.getItem('psicosis_admin') === 'true') {
+                        setIsAdmin(true);
+                    }
+                });
+                return () => unsubscribe();
             }, []);
 
-            // Función ultra segura: 1 solo clic en el icono secreto
+            // 2. Escuchar la cola de reproducción en tiempo real desde la nube (RULE 1 & 2)
+            useEffect(() => {
+                if (!user) return; // Esperar a que el usuario esté autenticado (RULE 3)
+
+                // Usamos ruta estricta (RULE 1)
+                const songsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'songs');
+                
+                const unsubscribe = onSnapshot(songsColRef, (snapshot) => {
+                    const cloudSongs = [];
+                    snapshot.forEach((doc) => {
+                        cloudSongs.push(doc.data());
+                    });
+                    
+                    // Ordenar canciones por fecha de subida en memoria (RULE 2 - Sin orderBy complejos)
+                    cloudSongs.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+                    
+                    // Canciones predeterminadas por defecto
+                    const defaultSongs = [
+                        {
+                            id: "default_1",
+                            title: "PAL TO",
+                            artist: "Austin San",
+                            album: "Sencillo Oficial",
+                            src: "https://ia600400.us.archive.org/29/items/austin-san-pal-to/Austin%20San%20-%20PAL%20TO.mp3",
+                            cover: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=600&q=80"
+                        },
+                        {
+                            id: "default_2",
+                            title: "NUEVAYoL",
+                            artist: "Bad Bunny",
+                            album: "Nadie Sabe Lo Que Va A Pasar Mañana",
+                            src: "https://ia902803.us.archive.org/29/items/01.-bad-bunny-nuevayo-l/01.%20Bad%20Bunny%20-%20NUEVAYoL.mp3",
+                            cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/cb/21/e4/cb21e427-46e3-15ea-f01f-0ec034f54eb7/38477.jpg/600x600bb.jpg"
+                        }
+                    ];
+                    
+                    setPlaylist([...defaultSongs, ...cloudSongs]);
+                }, (error) => {
+                    console.error("Error cargando cola desde Firestore:", error);
+                    setErrorMessage("Error de conexión con la nube o base de datos simulada ❌");
+                });
+                
+                return () => unsubscribe();
+            }, [user]);
+
+            // 3. Cargar audio al cambiar de pista
+            useEffect(() => {
+                const currentTrack = playlist[currentTrackIndex];
+                if (!currentTrack) return;
+                setResolvedAudioSrc(currentTrack.src);
+            }, [currentTrackIndex, playlist]);
+
+            const currentTrack = playlist[currentTrackIndex];
+            const coverSrc = currentTrack?.cover || "";
+            const fallbackCover = "https://placehold.co/600x600/03000a/c026d3?text=PSICOSIS+NEON";
+
+            // Función para abrir la ventana modal del creador (Modo Admin)
             const handleAdminAccess = () => {
                 if (isAdmin) return;
-                
-                const pwd = window.prompt("ACCESO RESTRINGIDO. Clave de creador:");
-                if (pwd === "psicosis") {
+                setShowAdminModal(true);
+            };
+
+            // Envío de la contraseña en el panel Cyberpunk modal
+            const handleAdminSubmit = () => {
+                if (adminPasswordInput === "psicosis") {
                     setIsAdmin(true);
                     localStorage.setItem('psicosis_admin', 'true');
-                    setErrorMessage("¡Modo Administrador Desbloqueado! 🔓");
+                    setErrorMessage("¡Modo Creador Desbloqueado! 🔓");
+                    setShowAdminModal(false);
+                    setAdminPasswordInput("");
                     setTimeout(() => setErrorMessage(""), 4000);
-                } else if (pwd !== null) {
+                } else {
                     setErrorMessage("Clave incorrecta ❌");
+                    setAdminPasswordInput("");
                     setTimeout(() => setErrorMessage(""), 3000);
                 }
             };
-            // ----------------------------------------
 
-            // Lista de reproducción dinámica con portadas reales
-            const [playlist, setPlaylist] = useState([
-                {
-                    title: "PAL TO",
-                    artist: "Austin San",
-                    album: "Sencillo Oficial",
-                    src: "https://ia601603.us.archive.org/12/items/austin-san-pal-to-video-oficial-austin-san/Austin%20San%20-%20PAL%20TO%20%28Video%20Oficial%29%20-%20Austin%20San.mp3",
-                    cover: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=600&q=80"
-                },
-                {
-                    title: "NUEVAYoL",
-                    artist: "Bad Bunny",
-                    album: "Nadie Sabe Lo Que Va A Pasar Mañana",
-                    src: "https://ia902803.us.archive.org/29/items/01.-bad-bunny-nuevayo-l/01.%20Bad%20Bunny%20-%20NUEVAYoL.mp3",
-                    cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/cb/21/e4/cb21e427-46e3-15ea-f01f-0ec034f54eb7/38477.jpg/600x600bb.jpg"
-                }
-            ]);
-            
-            const currentTrack = playlist[currentTrackIndex];
-            const audioSrc = currentTrack?.src || "";
-            const coverSrc = currentTrack?.cover || "";
-
-            // URL segura en caso de que todo falle o la canción no tenga carátula
-            const fallbackCover = "https://placehold.co/600x600/0f172a/c026d3?text=PSICOSIS+MUSIC";
-
-            // --- Extracción y Búsqueda Inteligente Avanzada ---
+            // --- Extracción de metadatos y carátula directamente de la URL ---
             const handleAddTrack = async (e) => {
                 e.preventDefault();
+                if (!user) return;
                 const urlToAdd = inputUrl.trim();
                 if (!urlToAdd) return;
 
-                // Validar duplicados
+                // Evitar canciones duplicadas
                 const isDuplicate = playlist.some(track => track.src === urlToAdd);
                 if (isDuplicate) {
                     setErrorMessage("⚠️ Este enlace ya está en la cola.");
@@ -140,169 +264,172 @@
                     return;
                 }
 
-                // Extraer el nombre base de archivo como salvavidas
+                setErrorMessage("Conectando con el enlace del audio... ⚡");
+
+                // Nombre por defecto extraído de la URL en caso de que falle todo
                 const urlParts = urlToAdd.split('/');
                 let decodedTitle = decodeURIComponent(urlParts[urlParts.length - 1]);
-                let baseName = decodedTitle.replace(/\.[a-zA-Z0-9]+$/i, ''); // Quitar extensión (.mp3)
+                let baseName = decodedTitle.replace(/\.[a-zA-Z0-9]+$/i, ''); // Quitar extensión
 
-                // Valores predeterminados en caso de que falle todo
                 let finalTitle = baseName;
-                let finalArtist = "Pista Inyectada";
+                let finalArtist = "Artista Desconocido";
                 let finalAlbum = "Sencillo";
                 let finalCover = fallbackCover;
 
-                let extractedArtist = "";
-                let extractedTitle = "";
+                try {
+                    // 1. Descargamos únicamente el inicio del archivo usando un stream de lectura directo (evita CORS de preflight)
+                    const response = await fetch(urlToAdd);
+                    if (!response.ok) throw new Error("Fallo al conectarse con el servidor de audio");
 
-                // Limpieza del nombre base por si se requiere búsqueda en iTunes
-                if (baseName.includes('-')) {
-                    const parts = baseName.split('-');
-                    extractedArtist = parts[0].replace(/^[\d\s\.\_]+/, '').trim();
-                    let titlePart = parts.slice(1).join(' ').trim();
-                    titlePart = titlePart.replace(/(?:https?:\/\/|www\.)[^\s]+/gi, '').replace(/[a-zA-Z0-9-]+\.(com|net|org|io|to|co|info)[\/\s]*/gi, ' ');
-                    titlePart = titlePart.replace(/[\[\(\{].*?[\]\)\}]/g, ' ');
-                    titlePart = titlePart.replace(/\b(official|video|audio|lyric|lyrics|remix|hd|hq|kbps|music)\b/gi, ' ');
-                    titlePart = titlePart.replace(/[-_\|~]/g, ' ');
-                    extractedTitle = titlePart.replace(/\s+/g, ' ').trim();
-                } else {
-                    let cleanTitle = baseName;
-                    cleanTitle = cleanTitle.replace(/(?:https?:\/\/|www\.)[^\s]+/gi, '').replace(/[a-zA-Z0-9-]+\.(com|net|org|io|to|co|info)[\/\s]*/gi, ' ');
-                    cleanTitle = cleanTitle.replace(/[\[\(\{].*?[\]\)\}]/g, ' ');
-                    cleanTitle = cleanTitle.replace(/\b(official|video|audio|lyric|lyrics|remix|hd|hq|kbps|music)\b/gi, ' ');
-                    cleanTitle = cleanTitle.replace(/^[\d\s\.\-\_]+/, '');
-                    cleanTitle = cleanTitle.replace(/[-_\|~]/g, ' ');
-                    extractedTitle = cleanTitle.replace(/\s+/g, ' ').trim();
-                }
+                    const reader = response.body.getReader();
+                    const chunks = [];
+                    let receivedLength = 0;
+                    const maxBytesToRead = 1.5 * 1024 * 1024; // Descargamos solo 1.5 MB para leer las ID3 tags
 
-                setErrorMessage("Analizando track e intentando leer metadatos... 🔍");
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        chunks.push(value);
+                        receivedLength += value.length;
+                        if (receivedLength >= maxBytesToRead) {
+                            await reader.cancel(); // Cancelamos la descarga para no consumir datos adicionales
+                            break;
+                        }
+                    }
 
-                let metadataSuccess = false;
+                    // Unimos los fragmentos descargados
+                    const mergedBuffer = new Uint8Array(receivedLength);
+                    let position = 0;
+                    for (let chunk of chunks) {
+                        mergedBuffer.set(chunk, position);
+                        position += chunk.length;
+                    }
 
-                // --- INTENTO 1: LECTURA DIRECTA DE ETIQUETAS INTERNAS (ID3) ---
-                if (window.jsmediatags) {
-                    try {
-                        const tags = await new Promise((resolve, reject) => {
-                            window.jsmediatags.read(urlToAdd, {
+                    const audioBlob = new Blob([mergedBuffer], { type: 'audio/mpeg' });
+
+                    setErrorMessage("Leyendo carátula y metadatos integrados... 🎨");
+
+                    // 2. Leemos la carátula y metadatos internos del Blob en memoria
+                    const tags = await new Promise((resolve, reject) => {
+                        if (window.jsmediatags) {
+                            window.jsmediatags.read(audioBlob, {
                                 onSuccess: (tag) => resolve(tag.tags),
                                 onError: (err) => reject(err)
                             });
-                        });
+                        } else {
+                            reject("Librería de metadatos no disponible");
+                        }
+                    });
 
-                        if (tags) {
-                            if (tags.title) finalTitle = tags.title;
-                            if (tags.artist) finalArtist = tags.artist;
-                            if (tags.album) finalAlbum = tags.album;
-                            
-                            // Si contiene foto incrustada, la convertimos a Base64 legible por el navegador
-                            if (tags.picture) {
-                                const { data, format } = tags.picture;
-                                let base64String = "";
-                                const bytes = new Uint8Array(data);
-                                for (let i = 0; i < bytes.byteLength; i++) {
-                                    base64String += String.fromCharCode(bytes[i]);
-                                }
-                                finalCover = `data:${format};base64,${btoa(base64String)}`;
-                                metadataSuccess = true;
-                            } else {
-                                // Si tiene título y artista pero no tiene foto interna, actualizamos la búsqueda
-                                extractedTitle = tags.title || extractedTitle;
-                                extractedArtist = tags.artist || extractedArtist;
+                    if (tags) {
+                        if (tags.title) finalTitle = tags.title;
+                        if (tags.artist) finalArtist = tags.artist;
+                        if (tags.album) finalAlbum = tags.album;
+                        
+                        // Extraemos la carátula integrada
+                        if (tags.picture) {
+                            const { data, format } = tags.picture;
+                            let base64String = "";
+                            const bytes = new Uint8Array(data);
+                            for (let i = 0; i < bytes.byteLength; i++) {
+                                base64String += String.fromCharCode(bytes[i]);
                             }
+                            finalCover = `data:${format};base64,${btoa(base64String)}`;
                         }
-                    } catch (err) {
-                        console.log("No se pudo leer las etiquetas ID3 internas (puede ser por CORS o falta de tags). Intentando búsqueda externa...");
                     }
-                }
 
-                // --- INTENTO 2: BÚSQUEDA EN TIENDAS ONLINE (Si no se leyó carátula interna) ---
-                if (!metadataSuccess) {
-                    let searchQuery = `${extractedArtist} ${extractedTitle}`.trim();
-                    if (!searchQuery) searchQuery = baseName;
-
+                } catch (err) {
+                    console.log("No se pudo extraer la carátula interna directamente. Buscando en la base de datos externa...", err);
+                    
+                    // Fallback: Si no tiene tags internas o la red bloqueó la lectura, busca en Apple Music
                     try {
-                        setErrorMessage("Buscando carátula oficial en bases de datos... 🌐");
-
-                        // Fase 1: Búsqueda Artista + Canción
-                        let res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(searchQuery)}&entity=song&limit=1`);
-                        let data = await res.json();
+                        const cleanQuery = baseName.replace(/[-_\|~]/g, ' ').trim();
+                        const res = await fetch(`https://is.gd/itunes_proxy?term=${encodeURIComponent(cleanQuery)}&entity=song&limit=1`, {
+                            // En caso de que falle el proxy, intentamos iTunes directamente
+                            onError: () => fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(cleanQuery)}&entity=song&limit=1`)
+                        }).catch(() => fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(cleanQuery)}&entity=song&limit=1`));
                         
-                        // Fase 2: Búsqueda solo por Título
-                        if ((!data.results || data.results.length === 0) && extractedTitle) {
-                            res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(extractedTitle)}&entity=song&limit=1`);
-                            data = await res.json();
-                        }
-
-                        // Fase 3: Búsqueda por Artista (para traer al menos su cara más reciente)
-                        if ((!data.results || data.results.length === 0) && extractedArtist) {
-                            res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(extractedArtist)}&entity=song&limit=1`);
-                            data = await res.json();
-                        }
-                        
+                        const data = await res.json();
                         if (data.results && data.results.length > 0) {
                             const trackData = data.results[0];
-                            
-                            // Si no teníamos metadatos internos, respetamos el nombre oficial encontrado
-                            if (!finalTitle || finalTitle === baseName) {
-                                const firstWordOfTitle = extractedTitle.split(' ')[0].toLowerCase();
-                                if (trackData.trackName.toLowerCase().includes(firstWordOfTitle)) {
-                                    finalTitle = trackData.trackName;
-                                    finalAlbum = trackData.collectionName;
-                                }
-                            }
+                            finalTitle = trackData.trackName;
                             finalArtist = trackData.artistName;
+                            finalAlbum = trackData.collectionName;
                             finalCover = trackData.artworkUrl100.replace('100x100bb', '600x600bb');
                         }
-                    } catch (error) {
-                        console.error("Fallo la consulta a la base de datos externa", error);
+                    } catch (apiErr) {
+                        console.error("Error en fallback de base de datos:", apiErr);
                     }
                 }
 
-                const newTrack = {
-                    title: finalTitle,
-                    artist: finalArtist,
-                    album: finalAlbum,
-                    src: urlToAdd,
-                    cover: finalCover
-                };
+                try {
+                    setErrorMessage("Subiendo información general a la nube... ☁️");
+                    
+                    const songId = 'song_' + Date.now();
+                    const songDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'songs', songId);
+                    
+                    // Guardamos la carátula (base64) y la URL del audio de forma permanente en la nube (RULE 1)
+                    await setDoc(songDocRef, {
+                        id: songId,
+                        title: finalTitle,
+                        artist: finalArtist,
+                        album: finalAlbum,
+                        src: urlToAdd,
+                        cover: finalCover,
+                        createdAt: Date.now()
+                    });
 
-                setPlaylist([...playlist, newTrack]);
-                setInputUrl("");
-                setErrorMessage("¡Track y Carátula listos en tu reproductor! 🎧🔥");
-                setTimeout(() => setErrorMessage(""), 3000);
+                    setInputUrl("");
+                    setErrorMessage("¡Canción y Carátula sincronizadas con éxito! 🎉🔥");
+                    setTimeout(() => setErrorMessage(""), 3000);
+                } catch (err) {
+                    console.error("Error al inyectar enlace en Firestore:", err);
+                    setErrorMessage("Error al conectar con la nube ❌");
+                    setTimeout(() => setErrorMessage(""), 3000);
+                }
             };
 
-            const removeTrack = (index, e) => {
+            const removeTrack = async (index, e) => {
                 e.stopPropagation();
-                if (playlist.length <= 1) {
-                    setErrorMessage("No puedes eliminar la única canción.");
+                if (!user) return;
+                const trackToDelete = playlist[index];
+                
+                if (trackToDelete.id.startsWith("default_")) {
+                    setErrorMessage("No puedes eliminar pistas por defecto.");
                     setTimeout(() => setErrorMessage(""), 3000);
                     return;
                 }
                 
-                const newPlaylist = playlist.filter((_, i) => i !== index);
-                setPlaylist(newPlaylist);
+                setErrorMessage("Eliminando de la nube de Google... 🗑️");
                 
-                if (currentTrackIndex === index) {
-                    setCurrentTrackIndex(0);
-                    setIsPlaying(false);
-                } else if (currentTrackIndex > index) {
-                    setCurrentTrackIndex(currentTrackIndex - 1);
+                try {
+                    const songDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'songs', trackToDelete.id);
+                    await deleteDoc(songDocRef);
+                    
+                    if (currentTrackIndex === index) {
+                        setCurrentTrackIndex(0);
+                        setIsPlaying(false);
+                    } else if (currentTrackIndex > index) {
+                        setCurrentTrackIndex(currentTrackIndex - 1);
+                    }
+                    
+                    setErrorMessage("¡Track eliminado permanentemente de la nube! ✅");
+                    setTimeout(() => setErrorMessage(""), 3000);
+                } catch (err) {
+                    console.error("Error eliminando track en Firestore:", err);
+                    setErrorMessage("Fallo al borrar en la nube ❌");
+                    setTimeout(() => setErrorMessage(""), 3000);
                 }
             };
 
             const playTrack = (index) => {
+                if (isBuffering) return;
                 setCurrentTrackIndex(index);
                 setIsPlaying(true);
             };
 
-            useEffect(() => {
-                if (isPlaying && audioRef.current) {
-                    audioRef.current.play().catch(e => console.error("Error autoplay:", e));
-                }
-            }, [currentTrackIndex, isPlaying]);
-
             const togglePlay = async () => {
-                if (!audioSrc) return;
+                if (!resolvedAudioSrc || isBuffering) return;
                 if (isPlaying) {
                     audioRef.current.pause();
                     setIsPlaying(false);
@@ -346,13 +473,20 @@
                 }
             };
 
-            const handleNext = () => setCurrentTrackIndex((prev) => (prev + 1) % playlist.length);
-            const handlePrev = () => setCurrentTrackIndex((prev) => (prev - 1 + playlist.length) % playlist.length);
+            const handleNext = () => {
+                if (isBuffering) return;
+                setCurrentTrackIndex((prev) => (prev + 1) % playlist.length);
+            };
+
+            const handlePrev = () => {
+                if (isBuffering) return;
+                setCurrentTrackIndex((prev) => (prev - 1 + playlist.length) % playlist.length);
+            };
 
             const handleDownload = async () => {
                 try {
                     setErrorMessage("Descargando track... ⏳");
-                    const response = await fetch(audioSrc);
+                    const response = await fetch(resolvedAudioSrc);
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
                     const link = document.createElement('a');
@@ -366,7 +500,7 @@
                     setTimeout(() => setErrorMessage(""), 3000);
                 } catch (error) {
                     console.error("CORS Error, abriendo link", error);
-                    window.open(audioSrc, '_blank');
+                    window.open(resolvedAudioSrc, '_blank');
                     setErrorMessage("");
                 }
             };
@@ -379,54 +513,132 @@
             };
 
             return (
-                <div className="min-h-screen w-full font-sans text-neutral-200 selection:bg-cyan-500 selection:text-black flex flex-col items-center justify-center p-4 relative overflow-hidden">
+                <div className="min-h-screen w-full font-sans text-neutral-200 selection:bg-cyan-500 selection:text-black flex flex-col items-center justify-center p-4 relative overflow-hidden bg-[#03000a]">
                     
-                    <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-fuchsia-600/20 rounded-full blur-[120px] pointer-events-none"></div>
-                    <div className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-cyan-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+                    {/* Luces Neón de Atmósfera Flotantes */}
+                    <div className="absolute top-[-15%] left-[-15%] w-[50vw] h-[50vw] bg-fuchsia-600/15 rounded-full blur-[140px] pointer-events-none animate-pulse"></div>
+                    <div className="absolute bottom-[-15%] right-[-15%] w-[50vw] h-[50vw] bg-cyan-600/15 rounded-full blur-[140px] pointer-events-none animate-pulse" style={{ animationDelay: '1s' }}></div>
+                    <div className="absolute top-1/2 left-1/3 w-[30vw] h-[30vw] bg-violet-600/10 rounded-full blur-[120px] pointer-events-none"></div>
 
+                    {/* Toast Notification de Neón */}
                     {errorMessage && (
-                        <div className="absolute top-6 z-50 bg-black/80 border border-fuchsia-500 text-fuchsia-400 px-6 py-3 rounded-md shadow-[0_0_15px_rgba(217,70,239,0.5)] font-bold text-sm tracking-widest uppercase flex items-center gap-3 backdrop-blur-md animate-pulse">
-                            <Zap size={18} /> {errorMessage}
+                        <div className="absolute top-6 z-50 bg-[#060012]/95 border-2 border-cyan-500 text-cyan-300 px-6 py-3 rounded-md shadow-[0_0_20px_rgba(6,182,212,0.8)] font-bold text-sm tracking-widest uppercase flex items-center gap-3 backdrop-blur-md">
+                            <Zap size={18} className="text-cyan-400 animate-bounce" /> {errorMessage}
                         </div>
                     )}
 
-                    <div className="w-full max-w-4xl bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row z-10">
+                    {/* VENTANA MODAL PERSONALIZADA DE ACCESO CREADOR (No usa window.prompt) */}
+                    {showAdminModal && (
+                        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4">
+                            <div className="w-full max-w-md bg-[#090514] border-2 border-fuchsia-500 rounded-2xl p-6 shadow-[0_0_30px_rgba(217,70,239,0.5)] relative">
+                                <button 
+                                    onClick={() => { setShowAdminModal(false); setAdminPasswordInput(""); }}
+                                    className="absolute top-4 right-4 text-neutral-400 hover:text-fuchsia-400 transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
+                                <h3 className="text-xl font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 mb-4 neon-text-fuchsia flex items-center gap-2">
+                                    <Zap size={20} className="text-fuchsia-500" />
+                                    Acceso Restringido
+                                </h3>
+                                <p className="text-sm text-neutral-400 mb-6 uppercase tracking-wider">
+                                    Introduce la clave de creador para activar el panel de inyección y edición:
+                                </p>
+                                <input 
+                                    type="password"
+                                    placeholder="Contraseña..."
+                                    value={adminPasswordInput}
+                                    onChange={(e) => setAdminPasswordInput(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') handleAdminSubmit(); }}
+                                    className="w-full bg-black/60 border border-fuchsia-500/40 rounded-lg px-4 py-3 text-sm text-fuchsia-200 focus:outline-none focus:border-fuchsia-400 focus:shadow-[0_0_15px_rgba(217,70,239,0.5)] transition-all placeholder:text-fuchsia-900/60 mb-6"
+                                    autoFocus
+                                />
+                                <div className="flex gap-3 justify-end">
+                                    <button 
+                                        onClick={() => { setShowAdminModal(false); setAdminPasswordInput(""); }}
+                                        className="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider text-neutral-400 hover:text-white transition-colors"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button 
+                                        onClick={handleAdminSubmit}
+                                        className="px-5 py-2.5 bg-fuchsia-600 hover:bg-fuchsia-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-all hover:shadow-[0_0_15px_rgba(217,70,239,0.8)]"
+                                    >
+                                        Verificar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Contenedor Principal con Bordes y Glow Neón */}
+                    <div className="w-full max-w-4xl bg-black/60 backdrop-blur-2xl border border-cyan-500/30 rounded-3xl shadow-[0_0_40px_rgba(6,182,212,0.25)] overflow-hidden flex flex-col md:flex-row z-10">
                         
-                        <div className="w-full md:w-1/2 p-8 flex flex-col items-center justify-between border-b md:border-b-0 md:border-r border-white/10 relative">
+                        {/* LADO IZQUIERDO: Reproductor de Vinilo Neón */}
+                        <div className="w-full md:w-1/2 p-8 flex flex-col items-center justify-between border-b md:border-b-0 md:border-r border-cyan-500/20 relative">
                             
                             <div className="w-full flex justify-between items-center mb-8">
-                                <h1 className="text-xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 uppercase flex items-center gap-2 select-none">
-                                    <div onClick={handleAdminAccess} className="cursor-pointer hover:scale-110 transition-transform">
-                                        <Disc3 className="text-cyan-400" />
+                                <h1 className="text-2xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-green-400 uppercase flex items-center gap-2 select-none">
+                                    <div onClick={handleAdminAccess} className="cursor-pointer hover:scale-110 transition-transform active:scale-95">
+                                        <Disc3 className="text-cyan-400 animate-spin-slow neon-text-cyan" style={{ animationPlayState: isPlaying && !isBuffering ? 'running' : 'paused' }} />
                                     </div>
-                                    Psicosis
+                                    <span className="neon-text-cyan">Psicosis</span>
                                 </h1>
-                                <button onClick={handleDownload} className="bg-white/10 hover:bg-cyan-500 hover:text-black transition-all p-2 rounded-full border border-white/10 hover:border-cyan-500 hover:shadow-[0_0_15px_rgba(34,211,238,0.6)]" title="Descargar Audio">
-                                    <Download size={20} />
+                                <button 
+                                    onClick={handleDownload} 
+                                    disabled={isBuffering} 
+                                    className="bg-black/40 hover:bg-cyan-500 text-cyan-400 hover:text-black transition-all p-2 rounded-full border border-cyan-500/40 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.8)] disabled:opacity-30" 
+                                    title="Descargar Audio"
+                                >
+                                    <Download size={18} />
                                 </button>
                             </div>
 
+                            {/* Disco Vinilo Neón Giratorio */}
                             <div className="relative group w-64 h-64 mb-8">
-                                <div className={`absolute inset-0 bg-gradient-to-tr from-cyan-500 to-fuchsia-500 rounded-full blur-xl opacity-40 transition-opacity ${isPlaying ? 'animate-pulse opacity-70' : ''}`}></div>
+                                {/* Anillo de brillo pulsante detrás */}
+                                <div className={`absolute inset-0 bg-gradient-to-tr from-cyan-500 to-fuchsia-500 rounded-full blur-2xl opacity-40 transition-opacity ${isPlaying && !isBuffering ? 'animate-pulse opacity-70' : 'opacity-20'}`}></div>
+                                
+                                {/* Vinilo con borde de neón fucsia brillante */}
+                                <div className="absolute inset-0 rounded-full border-2 border-fuchsia-500 shadow-[0_0_20px_rgba(217,70,239,0.7)] z-10"></div>
+                                
                                 <img 
                                     src={coverSrc} 
                                     alt="Cover" 
-                                    className={`w-full h-full object-cover rounded-full border-4 border-slate-900 shadow-2xl relative z-10 transition-transform duration-[10s] ease-linear ${isPlaying ? 'rotate-[360deg] animate-spin-slow' : ''}`}
+                                    className={`w-full h-full object-cover rounded-full border-[6px] border-black shadow-2xl relative z-10 transition-transform duration-[10s] ease-linear ${isPlaying && !isBuffering ? 'rotate-[360deg] animate-spin-slow' : ''}`}
                                     onError={(e) => { e.target.src = fallbackCover; }}
+                                    style={{ animationPlayState: isPlaying && !isBuffering ? 'running' : 'paused' }}
                                 />
-                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-slate-900 rounded-full border-4 border-neutral-800 z-20"></div>
+                                
+                                {isBuffering && (
+                                    <div className="absolute inset-0 bg-black/90 backdrop-blur-sm rounded-full z-20 flex flex-col items-center justify-center gap-3 border border-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.8)]">
+                                        <div className="w-12 h-12 border-4 border-t-fuchsia-500 border-cyan-400 rounded-full animate-spin"></div>
+                                        <span className="text-[10px] text-cyan-400 tracking-widest font-bold uppercase animate-pulse neon-text-cyan">Sintonizando...</span>
+                                    </div>
+                                )}
+                                
+                                {/* Orificio central del disco */}
+                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-[#03000a] rounded-full border-4 border-cyan-500/60 z-30 flex items-center justify-center">
+                                    <div className="w-2 h-2 bg-fuchsia-500 rounded-full"></div>
+                                </div>
                             </div>
 
+                            {/* Títulos con sombra de luz Neón */}
                             <div className="text-center w-full mb-8">
-                                <h2 className="text-3xl font-black uppercase tracking-wide text-white truncate mb-1" title={currentTrack?.title}>{currentTrack?.title || "Sin Pista"}</h2>
-                                <p className="text-cyan-400 font-bold tracking-widest text-sm uppercase">{currentTrack?.artist || "---"}</p>
+                                <h2 className="text-3xl font-black uppercase tracking-wide text-white truncate mb-1 neon-text-fuchsia" title={currentTrack?.title}>
+                                    {currentTrack?.title || "Sin Pista"}
+                                </h2>
+                                <p className="text-cyan-400 font-bold tracking-widest text-sm uppercase neon-text-cyan">
+                                    {currentTrack?.artist || "---"}
+                                </p>
                             </div>
 
-                            <div className="w-full flex items-center gap-4 mb-6 font-mono text-xs text-neutral-400">
-                                <span>{formatTime(progress)}</span>
-                                <div className="relative flex-1 h-2 bg-neutral-800 rounded-full group">
+                            {/* Barra de progreso con Glow Neón */}
+                            <div className="w-full flex items-center gap-4 mb-6 font-mono text-xs text-cyan-400/80">
+                                <span className="neon-text-cyan">{formatTime(progress)}</span>
+                                <div className="relative flex-1 h-2 bg-neutral-900 rounded-full group border border-cyan-500/20 shadow-[inset_0_0_5px_rgba(6,182,212,0.3)]">
                                     <div 
-                                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-400 to-fuchsia-500 rounded-full"
+                                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-400 to-fuchsia-500 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.8)]"
                                         style={{ width: `${duration ? (progress / duration) * 100 : 0}%` }}
                                     ></div>
                                     <input 
@@ -435,45 +647,55 @@
                                         max={duration || 100} 
                                         value={progress}
                                         onChange={handleProgressChange}
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        disabled={isBuffering}
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-20 text-cyan-400"
                                     />
                                 </div>
-                                <span>{formatTime(duration)}</span>
+                                <span className="neon-text-cyan">{formatTime(duration)}</span>
                             </div>
 
-                            <div className="flex items-center gap-6">
-                                <button onClick={handlePrev} className="text-neutral-400 hover:text-cyan-400 transition-colors"><SkipBack size={28} fill="currentColor" /></button>
+                            {/* Botones de control con Brillo Neón al pasar el cursor */}
+                            <div className="flex items-center gap-8">
+                                <button onClick={handlePrev} disabled={isBuffering} className="text-neutral-400 hover:text-cyan-400 hover:drop-shadow-[0_0_10px_rgba(6,182,212,1)] transition-all active:scale-90 disabled:opacity-30">
+                                    <SkipBack size={28} fill="currentColor" />
+                                </button>
+                                
                                 <button 
                                     onClick={togglePlay} 
-                                    className="w-16 h-16 flex items-center justify-center bg-white text-black rounded-full hover:scale-105 hover:bg-cyan-400 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(34,211,238,0.6)]"
+                                    disabled={isBuffering}
+                                    className="w-16 h-16 flex items-center justify-center bg-transparent border-2 border-cyan-400 text-cyan-400 rounded-full neon-glow-btn disabled:opacity-40"
                                 >
-                                    {isPlaying ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" className="ml-1" />}
+                                    {isPlaying && !isBuffering ? <Pause size={30} fill="currentColor" /> : <Play size={30} fill="currentColor" className="ml-1" />}
                                 </button>
-                                <button onClick={handleNext} className="text-neutral-400 hover:text-cyan-400 transition-colors"><SkipForward size={28} fill="currentColor" /></button>
+                                
+                                <button onClick={handleNext} disabled={isBuffering} className="text-neutral-400 hover:text-cyan-400 hover:drop-shadow-[0_0_10px_rgba(6,182,212,1)] transition-all active:scale-90 disabled:opacity-30">
+                                    <SkipForward size={28} fill="currentColor" />
+                                </button>
                             </div>
                         </div>
 
-                        <div className="w-full md:w-1/2 p-6 flex flex-col bg-black/40">
+                        {/* LADO DERECHO: Buscador, Inyector y Playlist Neón */}
+                        <div className="w-full md:w-1/2 p-6 flex flex-col bg-black/80">
                             
-                            {/* EL INYECTOR SOLO SE MUESTRA SI ERES ADMIN */}
+                            {/* EL INYECTOR (Modo Creador) con Neon Fuchsia */}
                             {isAdmin && (
-                                <form onSubmit={handleAddTrack} className="mb-6">
-                                    <label className="text-xs font-bold text-fuchsia-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                        <LinkIcon size={14} /> Modo Creador: Inyectar URL
+                                <form onSubmit={handleAddTrack} className="mb-6 border-b border-fuchsia-500/20 pb-6">
+                                    <label className="text-xs font-bold text-fuchsia-400 uppercase tracking-widest mb-2 flex items-center gap-2 neon-text-fuchsia">
+                                        <LinkIcon size={14} /> Modo Creador: Inyectar URL MP3
                                     </label>
                                     <div className="flex gap-2">
                                         <input 
                                             type="url" 
-                                            placeholder="Pega el enlace MP3 aquí..." 
+                                            placeholder="Pega el enlace de Archive.org aquí..." 
                                             value={inputUrl}
                                             onChange={(e) => setInputUrl(e.target.value)}
-                                            className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-fuchsia-500 focus:bg-white/10 transition-colors placeholder:text-neutral-600"
+                                            className="flex-1 bg-[#060012]/60 border border-fuchsia-500/30 rounded-lg px-4 py-3 text-sm text-fuchsia-200 focus:outline-none focus:border-fuchsia-400 focus:shadow-[0_0_15px_rgba(217,70,239,0.5)] transition-all placeholder:text-fuchsia-900/60"
                                             required
                                         />
                                         <button 
                                             type="submit" 
-                                            className="bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-4 py-3 rounded-lg font-bold transition-colors flex items-center justify-center"
-                                            title="Añadir Track"
+                                            className="bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-4 py-3 rounded-lg font-bold transition-all hover:shadow-[0_0_15px_rgba(217,70,239,0.8)] active:scale-95 flex items-center justify-center"
+                                            title="Inyectar y Auto-escanear MP3"
                                         >
                                             <Plus size={20} />
                                         </button>
@@ -481,8 +703,9 @@
                                 </form>
                             )}
 
-                            <div className="flex items-center gap-3 bg-white/5 p-3 rounded-lg mb-6 border border-white/5">
-                                <button onClick={toggleMute} className="text-neutral-400 hover:text-white transition-colors">
+                            {/* Slider de Volumen Neón Verde */}
+                            <div className="flex items-center gap-3 bg-black/40 p-3 rounded-lg mb-6 border border-green-500/20 shadow-[inset_0_0_10px_rgba(34,197,94,0.1)]">
+                                <button onClick={toggleMute} className="text-green-500 hover:text-green-300 transition-colors drop-shadow-[0_0_5px_rgba(34,197,94,0.5)]">
                                     {isMuted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
                                 </button>
                                 <input 
@@ -492,26 +715,27 @@
                                     step="0.01"
                                     value={isMuted ? 0 : volume}
                                     onChange={handleVolumeChange}
-                                    className="w-full h-1 bg-neutral-800 rounded-full appearance-none cursor-pointer accent-cyan-400"
+                                    className="w-full h-1 bg-neutral-900 rounded-full appearance-none cursor-pointer text-green-400"
                                 />
                             </div>
 
-                            <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400 mb-4 flex items-center gap-2">
+                            <h3 className="text-sm font-black uppercase tracking-widest text-cyan-400 mb-4 flex items-center gap-2 neon-text-cyan">
                                 <Music size={16} /> Cola de Reproducción
                             </h3>
 
-                            {/* Buscador de canciones */}
-                            <div className="relative mb-4">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-500" size={16} />
+                            {/* Buscador de canciones con Glow Cian */}
+                            <div className="relative mb-6">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-500" size={16} />
                                 <input
                                     type="text"
                                     placeholder="Buscar canción o artista..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors placeholder:text-neutral-600"
+                                    className="w-full bg-black/60 border border-cyan-500/20 rounded-lg pl-10 pr-4 py-2.5 text-sm text-cyan-100 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all placeholder:text-cyan-900"
                                 />
                             </div>
 
+                            {/* Lista de reproducción Neón con Ecualizador de Barras */}
                             <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
                                 {playlist
                                     .map((track, originalIndex) => ({ ...track, originalIndex }))
@@ -527,40 +751,40 @@
                                             onClick={() => playTrack(track.originalIndex)}
                                             className={`group relative flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-all border ${
                                                 isActive 
-                                                    ? 'bg-white/10 border-cyan-500/50 shadow-[inset_0_0_20px_rgba(34,211,238,0.1)]' 
-                                                    : 'bg-white/5 border-transparent hover:bg-white/10 hover:border-white/20'
+                                                    ? 'bg-cyan-950/20 border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)]' 
+                                                    : 'bg-black/40 border-transparent hover:bg-neutral-900/60 hover:border-cyan-500/20'
                                             }`}
                                         >
-                                            <div className="w-12 h-12 relative flex-shrink-0 overflow-hidden rounded-md">
+                                            <div className="w-12 h-12 relative flex-shrink-0 overflow-hidden rounded-md border border-cyan-500/10">
                                                 <img 
                                                     src={track.cover} 
                                                     alt="Cover" 
                                                     className="w-full h-full object-cover" 
                                                     onError={(e) => { e.target.src = fallbackCover; }}
                                                 />
-                                                {isActive && isPlaying && (
-                                                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-1">
-                                                        <div className="w-1 h-3 bg-cyan-400 animate-[bounce_1s_infinite]"></div>
-                                                        <div className="w-1 h-4 bg-fuchsia-500 animate-[bounce_1.2s_infinite]"></div>
-                                                        <div className="w-1 h-2 bg-cyan-400 animate-[bounce_0.8s_infinite]"></div>
+                                                {isActive && isPlaying && !isBuffering && (
+                                                    <div className="absolute inset-0 bg-black/75 flex items-center justify-center gap-0.5">
+                                                        <div className="w-1 h-3 bg-cyan-400 shadow-[0_0_5px_#22d3ee] animate-[bounce_1s_infinite]"></div>
+                                                        <div className="w-1 h-5 bg-fuchsia-500 shadow-[0_0_5px_#d946ef] animate-[bounce_1.2s_infinite] [animation-delay:0.2s]"></div>
+                                                        <div className="w-1 h-2 bg-green-400 shadow-[0_0_5px_#4ade80] animate-[bounce_0.8s_infinite] [animation-delay:0.4s]"></div>
                                                     </div>
                                                 )}
                                             </div>
                                             
                                             <div className="flex flex-col flex-1 min-w-0">
-                                                <span className={`font-bold uppercase truncate text-sm tracking-wider ${isActive ? 'text-cyan-400' : 'text-white'}`}>
-                                                    {track.title}
+                                                <span className={`font-bold uppercase truncate text-sm tracking-wider ${isActive ? 'text-cyan-400 neon-text-cyan' : 'text-neutral-200'}`}>
+                                                    {track.title} {track.numChunks && <span className="text-[9px] text-fuchsia-400 border border-fuchsia-500/30 px-1 rounded ml-1 lowercase tracking-normal">cloud</span>}
                                                 </span>
                                                 <span className="text-xs text-neutral-500 uppercase tracking-widest truncate">
                                                     {track.artist}
                                                 </span>
                                             </div>
 
-                                            {/* BOTON ELIMINAR SOLO VISIBLE PARA ADMIN */}
+                                            {/* BOTÓN ELIMINAR CON HOVER NEÓN ROJO */}
                                             {isAdmin && (
                                                 <button 
                                                     onClick={(e) => removeTrack(track.originalIndex, e)}
-                                                    className="p-2 text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                                                    className="p-2 text-neutral-600 hover:text-red-500 hover:drop-shadow-[0_0_8px_rgba(239,68,68,1)] opacity-0 group-hover:opacity-100 transition-all active:scale-90"
                                                     title="Eliminar"
                                                 >
                                                     <Trash2 size={16} />
@@ -575,8 +799,8 @@
                                     track.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                                     track.artist.toLowerCase().includes(searchTerm.toLowerCase())
                                 ).length === 0 && (
-                                    <div className="text-center text-neutral-600 text-xs py-4 uppercase tracking-widest">
-                                        No se encontraron resultados para "{searchTerm}".
+                                    <div className="text-center text-cyan-800 text-xs py-8 uppercase tracking-widest neon-text-cyan opacity-50">
+                                        No hay pistas que coincidan con "{searchTerm}".
                                     </div>
                                 )}
                             </div>
@@ -586,7 +810,7 @@
 
                     <audio 
                         ref={audioRef} 
-                        src={audioSrc}
+                        src={resolvedAudioSrc}
                         onTimeUpdate={handleTimeUpdate}
                         onLoadedMetadata={handleLoadedMetadata}
                         onEnded={handleNext}
