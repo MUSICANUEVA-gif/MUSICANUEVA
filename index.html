@@ -56,7 +56,7 @@
         import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
         import { 
             Play, Pause, SkipForward, SkipBack, Volume2, VolumeX,
-            Download, Plus, Link as LinkIcon, Music, Disc3, Zap, Trash2
+            Download, Plus, Link as LinkIcon, Music, Disc3, Zap, Trash2, Search
         } from 'https://esm.sh/lucide-react@0.294.0?deps=react@18.2.0';
 
         function App() {
@@ -68,6 +68,7 @@
             const [errorMessage, setErrorMessage] = useState("");
             const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
             const [inputUrl, setInputUrl] = useState("");
+            const [searchTerm, setSearchTerm] = useState("");
             const audioRef = useRef(null);
 
             // --- NUEVO: ESTADOS DE ADMINISTRADOR ---
@@ -121,9 +122,19 @@
 
             const handleAddTrack = (e) => {
                 e.preventDefault();
-                if (!inputUrl.trim()) return;
+                const urlToAdd = inputUrl.trim();
+                if (!urlToAdd) return;
 
-                const urlParts = inputUrl.split('/');
+                // --- NUEVO: Validar duplicados ---
+                const isDuplicate = playlist.some(track => track.src === urlToAdd);
+                if (isDuplicate) {
+                    setErrorMessage("⚠️ Este enlace ya está en la cola.");
+                    setTimeout(() => setErrorMessage(""), 3000);
+                    return;
+                }
+                // -----------------------------------
+
+                const urlParts = urlToAdd.split('/');
                 const lastPart = urlParts[urlParts.length - 1];
                 const cleanTitle = decodeURIComponent(lastPart).replace(/\.(mp3|wav|ogg|m4a)$/i, '') || "Pista Urbana";
 
@@ -131,7 +142,7 @@
                     title: cleanTitle,
                     artist: "Añadido por Usuario",
                     album: "Custom URL",
-                    src: inputUrl.trim(),
+                    src: urlToAdd,
                     cover: `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 1000)}?auto=format&fit=crop&w=400&q=80`
                 };
 
@@ -371,13 +382,31 @@
                                 <Music size={16} /> Cola de Reproducción
                             </h3>
 
+                            {/* NUEVO: Buscador de canciones */}
+                            <div className="relative mb-4">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-500" size={16} />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar canción o artista..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors placeholder:text-neutral-600"
+                                />
+                            </div>
+
                             <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                                {playlist.map((track, index) => {
-                                    const isActive = currentTrackIndex === index;
+                                {playlist
+                                    .map((track, originalIndex) => ({ ...track, originalIndex }))
+                                    .filter(track => 
+                                        track.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                        track.artist.toLowerCase().includes(searchTerm.toLowerCase())
+                                    )
+                                    .map((track) => {
+                                    const isActive = currentTrackIndex === track.originalIndex;
                                     return (
                                         <div 
-                                            key={index} 
-                                            onClick={() => playTrack(index)}
+                                            key={track.originalIndex} 
+                                            onClick={() => playTrack(track.originalIndex)}
                                             className={`group relative flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-all border ${
                                                 isActive 
                                                     ? 'bg-white/10 border-cyan-500/50 shadow-[inset_0_0_20px_rgba(34,211,238,0.1)]' 
@@ -407,7 +436,7 @@
                                             {/* BOTON ELIMINAR SOLO VISIBLE PARA ADMIN */}
                                             {isAdmin && (
                                                 <button 
-                                                    onClick={(e) => removeTrack(index, e)}
+                                                    onClick={(e) => removeTrack(track.originalIndex, e)}
                                                     className="p-2 text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
                                                     title="Eliminar"
                                                 >
@@ -417,6 +446,16 @@
                                         </div>
                                     );
                                 })}
+                                
+                                {/* Mensaje si no hay resultados */}
+                                {playlist.filter(track => 
+                                    track.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                    track.artist.toLowerCase().includes(searchTerm.toLowerCase())
+                                ).length === 0 && (
+                                    <div className="text-center text-neutral-600 text-xs py-4 uppercase tracking-widest">
+                                        No se encontraron resultados para "{searchTerm}".
+                                    </div>
+                                )}
                             </div>
 
                         </div>
