@@ -11,6 +11,9 @@
     <!-- Babel para compilar el código React en el navegador -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+    <!-- Librería jsmediatags para leer metadatos y portadas internas del MP3 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+
     <style>
         body { margin: 0; padding: 0; background-color: #020617; } /* slate-950 */
         .animate-spin-slow {
@@ -81,7 +84,7 @@
                 }
             }, []);
 
-            // Función ultra segura y sin fallos: 1 solo clic en el icono secreto
+            // Función ultra segura: 1 solo clic en el icono secreto
             const handleAdminAccess = () => {
                 if (isAdmin) return;
                 
@@ -98,21 +101,21 @@
             };
             // ----------------------------------------
 
-            // Lista de reproducción dinámica
+            // Lista de reproducción dinámica con portadas reales
             const [playlist, setPlaylist] = useState([
                 {
                     title: "PAL TO",
                     artist: "Austin San",
                     album: "Sencillo Oficial",
                     src: "https://ia601603.us.archive.org/12/items/austin-san-pal-to-video-oficial-austin-san/Austin%20San%20-%20PAL%20TO%20%28Video%20Oficial%29%20-%20Austin%20San.mp3",
-                    cover: "https://images.unsplash.com/photo-1493225457124-a1a2a5f5f468?auto=format&fit=crop&w=400&q=80"
+                    cover: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=600&q=80"
                 },
                 {
                     title: "NUEVAYoL",
                     artist: "Bad Bunny",
-                    album: "DeBÍ TiRAR MáS FOToS",
+                    album: "Nadie Sabe Lo Que Va A Pasar Mañana",
                     src: "https://ia902803.us.archive.org/29/items/01.-bad-bunny-nuevayo-l/01.%20Bad%20Bunny%20-%20NUEVAYoL.mp3",
-                    cover: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&w=400&q=80"
+                    cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/cb/21/e4/cb21e427-46e3-15ea-f01f-0ec034f54eb7/38477.jpg/600x600bb.jpg"
                 }
             ]);
             
@@ -120,7 +123,10 @@
             const audioSrc = currentTrack?.src || "";
             const coverSrc = currentTrack?.cover || "";
 
-            // --- MODIFICADO: Búsqueda inteligente de portadas ---
+            // URL segura en caso de que todo falle o la canción no tenga carátula
+            const fallbackCover = "https://placehold.co/600x600/0f172a/c026d3?text=PSICOSIS+MUSIC";
+
+            // --- Extracción y Búsqueda Inteligente Avanzada ---
             const handleAddTrack = async (e) => {
                 e.preventDefault();
                 const urlToAdd = inputUrl.trim();
@@ -134,36 +140,121 @@
                     return;
                 }
 
-                // Extraer el posible título del link para buscar
+                // Extraer el nombre base de archivo como salvavidas
                 const urlParts = urlToAdd.split('/');
-                const lastPart = urlParts[urlParts.length - 1];
-                let cleanTitle = decodeURIComponent(lastPart).replace(/\.(mp3|wav|ogg|m4a)$/i, '') || "Pista Urbana";
-                // Limpiamos los guiones para que la búsqueda sea más precisa
-                let searchTermApi = cleanTitle.replace(/[-_]/g, ' '); 
+                let decodedTitle = decodeURIComponent(urlParts[urlParts.length - 1]);
+                let baseName = decodedTitle.replace(/\.[a-zA-Z0-9]+$/i, ''); // Quitar extensión (.mp3)
 
-                // Datos por defecto (si no encuentra nada en la API)
-                let finalTitle = cleanTitle;
-                let finalArtist = "Añadido por Usuario";
-                let finalAlbum = "Custom URL";
-                let finalCover = `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 1000)}?auto=format&fit=crop&w=400&q=80`;
+                // Valores predeterminados en caso de que falle todo
+                let finalTitle = baseName;
+                let finalArtist = "Pista Inyectada";
+                let finalAlbum = "Sencillo";
+                let finalCover = fallbackCover;
 
-                try {
-                    setErrorMessage("Analizando track y buscando portada... 🔍");
-                    
-                    // Buscar en la base de datos pública de iTunes
-                    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(searchTermApi)}&entity=song&limit=1`);
-                    const data = await res.json();
-                    
-                    if (data.results && data.results.length > 0) {
-                        const trackData = data.results[0];
-                        finalTitle = trackData.trackName;
-                        finalArtist = trackData.artistName;
-                        finalAlbum = trackData.collectionName;
-                        // Transformamos la resolución de la portada de 100x100 a 600x600 (alta calidad)
-                        finalCover = trackData.artworkUrl100.replace('100x100bb', '600x600bb');
+                let extractedArtist = "";
+                let extractedTitle = "";
+
+                // Limpieza del nombre base por si se requiere búsqueda en iTunes
+                if (baseName.includes('-')) {
+                    const parts = baseName.split('-');
+                    extractedArtist = parts[0].replace(/^[\d\s\.\_]+/, '').trim();
+                    let titlePart = parts.slice(1).join(' ').trim();
+                    titlePart = titlePart.replace(/(?:https?:\/\/|www\.)[^\s]+/gi, '').replace(/[a-zA-Z0-9-]+\.(com|net|org|io|to|co|info)[\/\s]*/gi, ' ');
+                    titlePart = titlePart.replace(/[\[\(\{].*?[\]\)\}]/g, ' ');
+                    titlePart = titlePart.replace(/\b(official|video|audio|lyric|lyrics|remix|hd|hq|kbps|music)\b/gi, ' ');
+                    titlePart = titlePart.replace(/[-_\|~]/g, ' ');
+                    extractedTitle = titlePart.replace(/\s+/g, ' ').trim();
+                } else {
+                    let cleanTitle = baseName;
+                    cleanTitle = cleanTitle.replace(/(?:https?:\/\/|www\.)[^\s]+/gi, '').replace(/[a-zA-Z0-9-]+\.(com|net|org|io|to|co|info)[\/\s]*/gi, ' ');
+                    cleanTitle = cleanTitle.replace(/[\[\(\{].*?[\]\)\}]/g, ' ');
+                    cleanTitle = cleanTitle.replace(/\b(official|video|audio|lyric|lyrics|remix|hd|hq|kbps|music)\b/gi, ' ');
+                    cleanTitle = cleanTitle.replace(/^[\d\s\.\-\_]+/, '');
+                    cleanTitle = cleanTitle.replace(/[-_\|~]/g, ' ');
+                    extractedTitle = cleanTitle.replace(/\s+/g, ' ').trim();
+                }
+
+                setErrorMessage("Analizando track e intentando leer metadatos... 🔍");
+
+                let metadataSuccess = false;
+
+                // --- INTENTO 1: LECTURA DIRECTA DE ETIQUETAS INTERNAS (ID3) ---
+                if (window.jsmediatags) {
+                    try {
+                        const tags = await new Promise((resolve, reject) => {
+                            window.jsmediatags.read(urlToAdd, {
+                                onSuccess: (tag) => resolve(tag.tags),
+                                onError: (err) => reject(err)
+                            });
+                        });
+
+                        if (tags) {
+                            if (tags.title) finalTitle = tags.title;
+                            if (tags.artist) finalArtist = tags.artist;
+                            if (tags.album) finalAlbum = tags.album;
+                            
+                            // Si contiene foto incrustada, la convertimos a Base64 legible por el navegador
+                            if (tags.picture) {
+                                const { data, format } = tags.picture;
+                                let base64String = "";
+                                const bytes = new Uint8Array(data);
+                                for (let i = 0; i < bytes.byteLength; i++) {
+                                    base64String += String.fromCharCode(bytes[i]);
+                                }
+                                finalCover = `data:${format};base64,${btoa(base64String)}`;
+                                metadataSuccess = true;
+                            } else {
+                                // Si tiene título y artista pero no tiene foto interna, actualizamos la búsqueda
+                                extractedTitle = tags.title || extractedTitle;
+                                extractedArtist = tags.artist || extractedArtist;
+                            }
+                        }
+                    } catch (err) {
+                        console.log("No se pudo leer las etiquetas ID3 internas (puede ser por CORS o falta de tags). Intentando búsqueda externa...");
                     }
-                } catch (error) {
-                    console.error("No se pudo obtener la portada automática", error);
+                }
+
+                // --- INTENTO 2: BÚSQUEDA EN TIENDAS ONLINE (Si no se leyó carátula interna) ---
+                if (!metadataSuccess) {
+                    let searchQuery = `${extractedArtist} ${extractedTitle}`.trim();
+                    if (!searchQuery) searchQuery = baseName;
+
+                    try {
+                        setErrorMessage("Buscando carátula oficial en bases de datos... 🌐");
+
+                        // Fase 1: Búsqueda Artista + Canción
+                        let res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(searchQuery)}&entity=song&limit=1`);
+                        let data = await res.json();
+                        
+                        // Fase 2: Búsqueda solo por Título
+                        if ((!data.results || data.results.length === 0) && extractedTitle) {
+                            res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(extractedTitle)}&entity=song&limit=1`);
+                            data = await res.json();
+                        }
+
+                        // Fase 3: Búsqueda por Artista (para traer al menos su cara más reciente)
+                        if ((!data.results || data.results.length === 0) && extractedArtist) {
+                            res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(extractedArtist)}&entity=song&limit=1`);
+                            data = await res.json();
+                        }
+                        
+                        if (data.results && data.results.length > 0) {
+                            const trackData = data.results[0];
+                            
+                            // Si no teníamos metadatos internos, respetamos el nombre oficial encontrado
+                            if (!finalTitle || finalTitle === baseName) {
+                                const firstWordOfTitle = extractedTitle.split(' ')[0].toLowerCase();
+                                if (trackData.trackName.toLowerCase().includes(firstWordOfTitle)) {
+                                    finalTitle = trackData.trackName;
+                                    finalAlbum = trackData.collectionName;
+                                }
+                            }
+                            finalArtist = trackData.artistName;
+                            finalCover = trackData.artworkUrl100.replace('100x100bb', '600x600bb');
+                        }
+                    } catch (error) {
+                        console.error("Fallo la consulta a la base de datos externa", error);
+                    }
                 }
 
                 const newTrack = {
@@ -176,7 +267,7 @@
 
                 setPlaylist([...playlist, newTrack]);
                 setInputUrl("");
-                setErrorMessage("¡Track y Portada añadidos con éxito! 🔥");
+                setErrorMessage("¡Track y Carátula listos en tu reproductor! 🎧🔥");
                 setTimeout(() => setErrorMessage(""), 3000);
             };
 
@@ -304,7 +395,6 @@
                         <div className="w-full md:w-1/2 p-8 flex flex-col items-center justify-between border-b md:border-b-0 md:border-r border-white/10 relative">
                             
                             <div className="w-full flex justify-between items-center mb-8">
-                                {/* Título normal, el truco ahora está SÓLO en el icono del disco */}
                                 <h1 className="text-xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 uppercase flex items-center gap-2 select-none">
                                     <div onClick={handleAdminAccess} className="cursor-pointer hover:scale-110 transition-transform">
                                         <Disc3 className="text-cyan-400" />
@@ -322,7 +412,7 @@
                                     src={coverSrc} 
                                     alt="Cover" 
                                     className={`w-full h-full object-cover rounded-full border-4 border-slate-900 shadow-2xl relative z-10 transition-transform duration-[10s] ease-linear ${isPlaying ? 'rotate-[360deg] animate-spin-slow' : ''}`}
-                                    onError={(e) => { e.target.src = 'https://via.placeholder.com/400?text=PSICOSIS'; }}
+                                    onError={(e) => { e.target.src = fallbackCover; }}
                                 />
                                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-slate-900 rounded-full border-4 border-neutral-800 z-20"></div>
                             </div>
@@ -442,7 +532,12 @@
                                             }`}
                                         >
                                             <div className="w-12 h-12 relative flex-shrink-0 overflow-hidden rounded-md">
-                                                <img src={track.cover} alt="Cover" className="w-full h-full object-cover" />
+                                                <img 
+                                                    src={track.cover} 
+                                                    alt="Cover" 
+                                                    className="w-full h-full object-cover" 
+                                                    onError={(e) => { e.target.src = fallbackCover; }}
+                                                />
                                                 {isActive && isPlaying && (
                                                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-1">
                                                         <div className="w-1 h-3 bg-cyan-400 animate-[bounce_1s_infinite]"></div>
