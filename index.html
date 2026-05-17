@@ -71,7 +71,7 @@
             const [searchTerm, setSearchTerm] = useState("");
             const audioRef = useRef(null);
 
-            // --- NUEVO: ESTADOS DE ADMINISTRADOR ---
+            // --- ESTADOS DE ADMINISTRADOR ---
             const [isAdmin, setIsAdmin] = useState(false);
 
             // Verificar si ya somos admin al recargar la página
@@ -120,35 +120,63 @@
             const audioSrc = currentTrack?.src || "";
             const coverSrc = currentTrack?.cover || "";
 
-            const handleAddTrack = (e) => {
+            // --- MODIFICADO: Búsqueda inteligente de portadas ---
+            const handleAddTrack = async (e) => {
                 e.preventDefault();
                 const urlToAdd = inputUrl.trim();
                 if (!urlToAdd) return;
 
-                // --- NUEVO: Validar duplicados ---
+                // Validar duplicados
                 const isDuplicate = playlist.some(track => track.src === urlToAdd);
                 if (isDuplicate) {
                     setErrorMessage("⚠️ Este enlace ya está en la cola.");
                     setTimeout(() => setErrorMessage(""), 3000);
                     return;
                 }
-                // -----------------------------------
 
+                // Extraer el posible título del link para buscar
                 const urlParts = urlToAdd.split('/');
                 const lastPart = urlParts[urlParts.length - 1];
-                const cleanTitle = decodeURIComponent(lastPart).replace(/\.(mp3|wav|ogg|m4a)$/i, '') || "Pista Urbana";
+                let cleanTitle = decodeURIComponent(lastPart).replace(/\.(mp3|wav|ogg|m4a)$/i, '') || "Pista Urbana";
+                // Limpiamos los guiones para que la búsqueda sea más precisa
+                let searchTermApi = cleanTitle.replace(/[-_]/g, ' '); 
+
+                // Datos por defecto (si no encuentra nada en la API)
+                let finalTitle = cleanTitle;
+                let finalArtist = "Añadido por Usuario";
+                let finalAlbum = "Custom URL";
+                let finalCover = `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 1000)}?auto=format&fit=crop&w=400&q=80`;
+
+                try {
+                    setErrorMessage("Analizando track y buscando portada... 🔍");
+                    
+                    // Buscar en la base de datos pública de iTunes
+                    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(searchTermApi)}&entity=song&limit=1`);
+                    const data = await res.json();
+                    
+                    if (data.results && data.results.length > 0) {
+                        const trackData = data.results[0];
+                        finalTitle = trackData.trackName;
+                        finalArtist = trackData.artistName;
+                        finalAlbum = trackData.collectionName;
+                        // Transformamos la resolución de la portada de 100x100 a 600x600 (alta calidad)
+                        finalCover = trackData.artworkUrl100.replace('100x100bb', '600x600bb');
+                    }
+                } catch (error) {
+                    console.error("No se pudo obtener la portada automática", error);
+                }
 
                 const newTrack = {
-                    title: cleanTitle,
-                    artist: "Añadido por Usuario",
-                    album: "Custom URL",
+                    title: finalTitle,
+                    artist: finalArtist,
+                    album: finalAlbum,
                     src: urlToAdd,
-                    cover: `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 1000)}?auto=format&fit=crop&w=400&q=80`
+                    cover: finalCover
                 };
 
                 setPlaylist([...playlist, newTrack]);
                 setInputUrl("");
-                setErrorMessage("¡Track añadido a la cola! 🔥");
+                setErrorMessage("¡Track y Portada añadidos con éxito! 🔥");
                 setTimeout(() => setErrorMessage(""), 3000);
             };
 
@@ -382,7 +410,7 @@
                                 <Music size={16} /> Cola de Reproducción
                             </h3>
 
-                            {/* NUEVO: Buscador de canciones */}
+                            {/* Buscador de canciones */}
                             <div className="relative mb-4">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-500" size={16} />
                                 <input
