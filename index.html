@@ -197,25 +197,48 @@
                 }
             };
 
-            // FUNCIÓN DE DESCARGA SOLUCIONADA PARA TODOS LOS USUARIOS
-            const descargarArchivoMp3 = (e, urlAncla, nombreTrack) => {
+            // 🔥 FUNCIÓN DE DESCARGA DIRECTA E INSTANTÁNEA (CORREGIDA)
+            const descargarArchivoMp3 = async (e, urlAncla, nombreTrack) => {
                 e.preventDefault();
                 if (!urlAncla) return;
 
-                // Crear un enlace temporal nativo de HTML
-                const enlaceDescarga = document.createElement('a');
-                enlaceDescarga.href = urlAncla;
-                
-                // Forzar descarga nativa y definir el nombre del archivo
-                enlaceDescarga.setAttribute('download', `${nombreTrack}.mp3`);
-                
-                // Asegurar que si hay problemas de CORS, se abra en una pestaña limpia de descarga externa
-                enlaceDescarga.setAttribute('target', '_blank');
-                enlaceDescarga.setAttribute('rel', 'noopener noreferrer');
-                
-                document.body.appendChild(enlaceDescarga);
-                enlaceDescarga.click();
-                document.body.removeChild(enlaceDescarga);
+                // Cambiar temporalmente el estado del botón
+                setDescargandoMedia(true);
+
+                try {
+                    // Descargamos el archivo de música de fondo de manera silenciosa
+                    const respuesta = await fetch(urlAncla);
+                    if (!respuesta.ok) throw new Error("Error en la descarga");
+                    
+                    const blob = await respuesta.blob();
+                    
+                    // Creamos el enlace de descarga directo sobre el archivo ya bajado
+                    const urlBlob = window.URL.createObjectURL(blob);
+                    const enlaceTemporal = document.createElement('a');
+                    enlaceTemporal.href = urlBlob;
+                    
+                    // Asignamos el nombre correcto de la canción
+                    enlaceTemporal.setAttribute('download', `${nombreTrack || 'musica'}.mp3`);
+                    document.body.appendChild(enlaceTemporal);
+                    
+                    // Ejecuta la descarga instantánea sin abrir pestañas nuevas
+                    enlaceTemporal.click();
+                    
+                    // Limpieza de memoria
+                    document.body.removeChild(enlaceTemporal);
+                    window.URL.revokeObjectURL(urlBlob);
+                } catch (error) {
+                    console.error("Fallo la descarga interna, usando método alternativo directo: ", error);
+                    // Método de respaldo por si el servidor bloquea la lectura directa
+                    const enlaceRespaldo = document.createElement('a');
+                    enlaceRespaldo.href = urlAncla;
+                    enlaceRespaldo.setAttribute('download', `${nombreTrack}.mp3`);
+                    document.body.appendChild(enlaceRespaldo);
+                    enlaceRespaldo.click();
+                    document.body.removeChild(enlaceRespaldo);
+                } finally {
+                    setDescargandoMedia(false);
+                }
             };
 
             const procesarEnlaceArchive = async () => {
@@ -405,15 +428,16 @@
                                 <p className="text-sm text-fuchsia-400 font-medium tracking-wide mt-0.5 truncate px-4">{trackActual.artista}</p>
                             </div>
 
-                            {/* Descarga Modificada y Segura */}
+                            {/* Descarga Modificada e Instantánea Directa */}
                             {canciones.length > 0 && trackActual.mp3Url && (
                                 <div className="flex justify-center mb-5">
                                     <button 
                                         onClick={(e) => descargarArchivoMp3(e, trackActual.mp3Url, trackActual.titulo)}
-                                        className="flex items-center gap-2 px-4 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 rounded-full text-xs text-neutral-300 font-medium transition"
+                                        className="flex items-center gap-2 px-4 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-black border border-cyan-400 rounded-full text-xs font-bold transition shadow-[0_0_15px_rgba(6,182,212,0.4)] disabled:opacity-50"
+                                        disabled={descargandoMedia}
                                     >
                                         <DownloadIcon />
-                                        <span>Descargar MP3 Original</span>
+                                        <span>{descargandoMedia ? "Descargando..." : "Descargar MP3 Directo"}</span>
                                     </button>
                                 </div>
                             )}
