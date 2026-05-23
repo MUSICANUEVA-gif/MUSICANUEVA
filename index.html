@@ -195,7 +195,7 @@
                 }
             };
 
-            // DETALLE 1 CORREGIDO: FUNCIÓN DE DESCARGA DIRECTA REAL SIN ABRIR OTRA PESTAÑA
+            // DESCARGA DIRECTA FORZADA (Misma pestaña, sin ventanas emergentes)
             const descargarArchivoMp3 = async (e, urlAncla, nombreTrack) => {
                 e.preventDefault();
                 if (!urlAncla || descargandoMedia) return;
@@ -215,26 +215,24 @@
                     document.body.removeChild(enlaceDescarga);
                     window.URL.revokeObjectURL(urlBlob);
                 } catch (error) {
-                    // Fallback directo seguro si hay bloqueos extremos del navegador
                     window.location.href = urlAncla;
                 } finally {
                     setDescargandoMedia(false);
                 }
             };
 
-            // DETALLE 2 CORREGIDO: INYECTOR INTELIGENTE CON EXTRACCIÓN MEJORADA DE CARÁTULA
+            // INYECTOR INTELIGENTE REFORZADO CONTRA CARÁTULAS ROTAS
             const procesarEnlaceArchive = async () => {
                 if (!inputUrlArchive.trim()) return;
-                setEstadoInyector("Descargando fragmento de 2.5 MB para metadatos...");
+                setEstadoInyector("Analizando archivo y buscando carátula...");
                 setDatosExtraidos(null);
 
-                // Generar carátula inteligente alternativa basada en el directorio de Archive.org
-                let portadaAlternativa = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500";
+                // Obtener carátula oficial optimizada desde el servidor de Archive de forma automática
+                let portadaAutoArchive = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500";
                 try {
                     if (inputUrlArchive.includes("/items/")) {
                         const parteItem = inputUrlArchive.split("/items/")[1].split("/")[0];
-                        // Apunta al archivo de carátula pre-generado que Archive crea automáticamente para sus álbumes
-                        portadaAlternativa = `https://archive.org/services/img/${parteItem}`;
+                        portadaAutoArchive = `https://archive.org/services/img/${parteItem}`;
                     }
                 } catch(e){}
 
@@ -243,49 +241,49 @@
                         headers: { 'Range': 'bytes=0-2500000' }
                     });
                     const blob = await respuesta.blob();
-                    setEstadoInyector("Extrayendo foto de perfil incrustada e información...");
 
                     jsmediatags.read(blob, {
                         onSuccess: function(tag) {
                             let titulo = tag.tags.title || "Canción Nueva";
                             let artista = tag.tags.artist || "Psicosis Music";
-                            let portada = portadaAlternativa;
+                            let portada = portadaAutoArchive; // Usar por defecto la oficial de Archive (Garantiza que no se rompa)
 
                             const image = tag.tags.picture;
-                            if (image) {
+                            // Solo usar base64 si la foto interna es extremadamente ligera para evitar saturar Firebase
+                            if (image && image.data.length < 150000) {
                                 let base64String = "";
                                 for (let i = 0; i < image.data.length; i++) {
                                     base64String += String.fromCharCode(image.data[i]);
                                 }
                                 portada = "data:" + image.format + ";base64," + window.btoa(base64String);
-                                setEstadoInyector("¡Carátula interna del archivo MP3 leída!");
+                                setEstadoInyector("¡Metadatos y foto interna cargados con éxito!");
                             } else {
-                                setEstadoInyector("¡Carátula del álbum enlazada automáticamente!");
+                                setEstadoInyector("¡Enlazando carátula HD original desde Archive.org!");
                             }
 
                             setDatosExtraidos({ titulo, artista, portada, mp3Url: inputUrlArchive });
                         },
                         onError: function() {
-                            setEstadoInyector("Metadatos inteligentes aplicados con éxito.");
+                            setEstadoInyector("Metadatos generados automáticamente.");
                             const decodificado = decodeURIComponent(inputUrlArchive);
                             const nombreArchivo = decodificado.substring(decodificado.lastIndexOf('/') + 1).replace(".mp3", "");
                             
                             setDatosExtraidos({
                                 titulo: nombreArchivo,
                                 artista: "Psicosis Music",
-                                portada: portadaAlternativa,
+                                portada: portadaAutoArchive,
                                 mp3Url: inputUrlArchive
                             });
                         }
                     });
                 } catch (err) {
-                    setEstadoInyector("Listo para guardar cambios.");
+                    setEstadoInyector("Listo para guardar.");
                     const decodificado = decodeURIComponent(inputUrlArchive);
                     const nombreArchivo = decodificado.substring(decodificado.lastIndexOf('/') + 1).replace(".mp3", "");
                     setDatosExtraidos({
                         titulo: nombreArchivo,
                         artista: "Psicosis Music",
-                        portada: portadaAlternativa,
+                        portada: portadaAutoArchive,
                         mp3Url: inputUrlArchive
                     });
                 }
@@ -298,7 +296,7 @@
                     if (error) {
                         alert("Error al sincronizar.");
                     } else {
-                        alert("¡Guardado de forma automática! Los cambios están listos y publicados.");
+                        alert("¡Guardado completado con éxito!");
                         setInputUrlArchive("");
                         setDatosExtraidos(null);
                         setEstadoInyector("");
@@ -334,7 +332,7 @@
                             </button>
                         </div>
 
-                        {/* PANEL INYECTOR CON BOTÓN DE GUARDAR CAMBIOS */}
+                        {/* PANEL INYECTOR INTELIGENTE */}
                         {panelAbierto && (
                             <div className="mb-6 p-4 bg-black/50 border border-fuchsia-500/40 rounded-2xl space-y-4">
                                 {!esAdmin ? (
@@ -351,11 +349,11 @@
                                     </form>
                                 ) : (
                                     <div className="space-y-3">
-                                        <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-widest">Inyector Automático de 2.5MB</h3>
+                                        <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-widest">Inyector Inteligente</h3>
                                         
                                         <div className="flex gap-2">
                                             <input 
-                                                type="url" placeholder="Pega el enlace .mp3 de archive.org aquí..." 
+                                                type="url" placeholder="Pega el enlace .mp3 de archive.org..." 
                                                 value={inputUrlArchive} onChange={(e) => setInputUrlArchive(e.target.value)}
                                                 className="flex-1 bg-[#150d33] p-2 text-xs rounded border border-cyan-500/20 focus:outline-none text-white"
                                             />
@@ -369,7 +367,7 @@
 
                                         {estadoInyector && <p className="text-[11px] text-fuchsia-400 font-mono italic">{estadoInyector}</p>}
 
-                                        {/* Bloque de Confirmación y Guardado Automático */}
+                                        {/* Confirmación Automática */}
                                         {datosExtraidos && (
                                             <div className="p-2 bg-[#120a2b] border border-cyan-500/30 rounded space-y-2">
                                                 <div className="flex items-center gap-2">
@@ -398,7 +396,7 @@
                             <div className={`w-56 h-56 rounded-full border-4 border-cyan-400 p-1 shadow-[0_0_35px_rgba(6,182,212,0.3)] ${isPlaying ? 'animate-spin-slow' : ''}`}>
                                 <img 
                                     src={trackActual.portadaUrl} alt="Carátula" 
-                                    className="w-full h-full object-cover rounded-full select-none"
+                                    className="w-full h-full object-cover rounded-full select-none shadow-inner"
                                     onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500"; }}
                                 />
                             </div>
@@ -410,7 +408,7 @@
                             <p className="text-sm text-fuchsia-400 font-medium tracking-wide mt-0.5 truncate px-4">{trackActual.artista}</p>
                         </div>
 
-                        {/* BOTÓN DE DESCARGA DIRECTA EDITADO (SIN NUEVAS PESTAÑAS) */}
+                        {/* Descarga Forzada (Misma pestaña) */}
                         {canciones.length > 0 && trackActual.mp3Url && (
                             <div className="flex justify-center mb-5">
                                 <button 
@@ -419,7 +417,7 @@
                                     disabled={descargandoMedia}
                                 >
                                     <DownloadIcon />
-                                    <span>{descargandoMedia ? "Descargando Archivo..." : "Descargar MP3 Original"}</span>
+                                    <span>{descargandoMedia ? "Descargando..." : "Descargar MP3 Original"}</span>
                                 </button>
                             </div>
                         )}
@@ -473,7 +471,6 @@
 
         const container = document.getElementById('root');
         const root = createRoot(container);
-        root.render(App);
         root.render(<App />);
     </script>
 </body>
