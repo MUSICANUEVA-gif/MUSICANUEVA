@@ -5,14 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Psicosis Music - Neon Cyberpunk</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Librerías Externas -->
+    <script src="https://tailwindcss.com"></script>
+    <script src="https://unpkg.com"></script>
+    <script src="https://unpkg.com"></script>
+    <script src="https://unpkg.com"></script>
+    <script src="https://cloudflare.com"></script>
 
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+    <!-- SDK de Firebase (Compatibilidad Global) -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
 
     <style>
         body { 
@@ -20,7 +22,6 @@
             padding: 0; 
             background-color: #03000a; 
         }
-        
         .animate-spin-slow {
             animation: spin 8s linear infinite;
         }
@@ -28,7 +29,6 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-
         .neon-glow-btn {
             box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
             transition: all 0.3s ease;
@@ -37,14 +37,12 @@
             box-shadow: 0 0 35px rgba(217, 70, 239, 0.8);
             transform: scale(1.05);
         }
-
         .neon-text-cyan {
             text-shadow: 0 0 8px rgba(6, 182, 212, 0.8), 0 0 20px rgba(6, 182, 212, 0.3);
         }
         .neon-text-fuchsia {
             text-shadow: 0 0 8px rgba(217, 70, 239, 0.8), 0 0 20px rgba(217, 70, 239, 0.3);
         }
-
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
         }
@@ -61,7 +59,6 @@
             background-color: rgba(6, 182, 212, 0.6);
             box-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
         }
-
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
             height: 14px;
@@ -82,551 +79,124 @@
         const { useState, useRef, useEffect } = React;
         const { createRoot } = ReactDOM;
 
-        // --- ICONOS ---
-        const PlayIcon = ({ size = 24, ...props }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="5 3 19 12 5 21 5 3"/></svg>;
-        const PauseIcon = ({ size = 24, ...props }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>;
-        const SkipForwardIcon = ({ size = 24, ...props }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>;
-        const SkipBackIcon = ({ size = 24, ...props }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="5" x2="5" y2="19"/></svg>;
-        const Volume2Icon = ({ size = 24, ...props }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>;
-        const VolumeXIcon = ({ size = 24, ...props }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>;
-        const DownloadIcon = ({ size = 24, ...props }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
-        const PlusIcon = ({ size = 24, ...props }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
-        const DiscIcon = ({ size = 24, ...props }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>;
-        const ZapIcon = ({ size = 24, ...props }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
-        const TrashIcon = ({ size = 24, ...props }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>;
-        const SearchIcon = ({ size = 24, ...props }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
-        const XIcon = ({ size = 24, ...props }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
-        const CheckIcon = ({ size = 24, ...props }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="20 6 9 17 4 12"/></svg>;
-        const MusicIcon = ({ size = 24, ...props }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>;
+        // --- CONFIGURACIÓN DE TU PROYECTO PSICOSISMUSIC ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAznXQHLb2b_c0BDIPteN2TPmY8WBmf0fw",
+            authDomain: "psicosismusic-2b04a.firebaseapp.com",
+            databaseURL: "https://firebaseio.com",
+            projectId: "psicosismusic-2b04a",
+            storageBucket: "psicosismusic-2b04a.firebasestorage.app",
+            messagingSenderId: "233441166744",
+            appId: "1:233441166744:web:6757b5fb8d4fd1803697ed",
+            measurementId: "G-Q5T61C2MNE"
+        };
 
-        let appId = 'psicosis-music-app';
-        let firebaseEnabled = false;
+        // Inicializar Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        // --- ICONOS ---
+        const PlayIcon = ({ size = 24, ...props }) => <svg xmlns="http://w3.org" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="5 3 19 12 5 21 5 3"/></svg>;
+        const PauseIcon = ({ size = 24, ...props }) => <svg xmlns="http://w3.org" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>;
+        const SkipForwardIcon = ({ size = 24, ...props }) => <svg xmlns="http://w3.org" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>;
+        const SkipBackIcon = ({ size = 24, ...props }) => <svg xmlns="http://w3.org" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="5" x2="5" y2="19"/></svg>;
+        const Volume2Icon = ({ size = 24, ...props }) => <svg xmlns="http://w3.org" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>;
+        const TrashIcon = ({ size = 24, ...props }) => <svg xmlns="http://w3.org" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>;
+        const PlusIcon = ({ size = 24, ...props }) => <svg xmlns="http://w3.org" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
 
         function App() {
+            const [canciones, setCanciones] = useState([]);
+            const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
             const [isPlaying, setIsPlaying] = useState(false);
             const [progress, setProgress] = useState(0);
             const [duration, setDuration] = useState(0);
-            const [volume, setVolume] = useState(0.8);
-            const [isMuted, setIsMuted] = useState(false);
-            const [errorMessage, setErrorMessage] = useState("");
-            const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-            const [inputUrl, setInputUrl] = useState("");
-            const [searchTerm, setSearchTerm] = useState("");
-            
-            const [isBuffering, setIsBuffering] = useState(false);
-            const [resolvedAudioSrc, setResolvedAudioSrc] = useState("");
-            const [cloudSongs, setCloudSongs] = useState([]);
-            const [deletedDefaultIds, setDeletedDefaultIds] = useState(() => {
-                try {
-                    const saved = localStorage.getItem('psicosis_deleted_defaults');
-                    return saved ? JSON.parse(saved) : [];
-                } catch (e) { return []; }
-            });
-            const [user, setUser] = useState(null);
-            const [db, setDb] = useState(null);
-            const [auth, setAuth] = useState(null);
-            const [firebaseReady, setFirebaseReady] = useState(false);
+            const [panelAbierto, setPanelAbierto] = useState(false);
+
+            const [nuevoTitulo, setNuevoTitulo] = useState("");
+            const [nuevoArtista, setNuevoArtista] = useState("");
+            const [nuevoMp3Url, setNuevoMp3Url] = useState("");
+            const [nuevaPortadaUrl, setNuevaPortadaUrl] = useState("");
+
             const audioRef = useRef(null);
 
-            const [isAdmin, setIsAdmin] = useState(false);
-            const [showAdminModal, setShowAdminModal] = useState(false);
-            const [adminPasswordInput, setAdminPasswordInput] = useState("");
-
-            const defaultSongs = [
-                {
-                    id: "default_1",
-                    title: "PAL TO",
-                    artist: "Austin San",
-                    album: "Sencillo Oficial",
-                    src: "https://ia600400.us.archive.org/29/items/austin-san-pal-to/Austin%20San%20-%20PAL%20TO.mp3",
-                    cover: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=600&q=80"
-                },
-                {
-                    id: "default_2",
-                    title: "NUEVAYoL",
-                    artist: "Bad Bunny",
-                    album: "Nadie Sabe Lo Que Va A Pasar Mañana",
-                    src: "https://ia902803.us.archive.org/29/items/01.-bad-bunny-nuevayo-l/01.%20Bad%20Bunny%20-%20NUEVAYoL.mp3",
-                    cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/cb/21/e4/cb21e427-46e3-15ea-f01f-0ec034f54eb7/38477.jpg/600x600bb.jpg"
-                }
-            ];
-
+            // Escuchar cambios en la base de datos
             useEffect(() => {
-                const loadFirebase = async () => {
-                    try {
-                        const firebaseConfig = {
-                            apiKey: "AIzaSyAznXQHLb2b_cOBDIPteN2TPmY8WBmf0fw",
-                            authDomain: "psicosismusic-2b04a.firebaseapp.com",
-                            projectId: "psicosismusic-2b04a",
-                            storageBucket: "psicosismusic-2b04a.firebasestorage.app",
-                            messagingSenderId: "233441166744",
-                            appId: "1:233441166744:web:6757b5fb8d4fd1803697ed",
-                            measurementId: "G-Q5T61C2MNE"
-                        };
-
-                        const { initializeApp: initApp } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js');
-                        const { getAuth: gAuth, signInAnonymously, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
-                        const { getFirestore: gFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, onSnapshot } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
-
-                        const appInstance = initApp(firebaseConfig);
-                        const authInstance = gAuth(appInstance);
-                        const dbInstance = gFirestore(appInstance);
-
-                        window.firebaseMethods = { doc, setDoc, getDoc, collection, getDocs, deleteDoc, onSnapshot, signInAnonymously, onAuthStateChanged };
-
-                        setAuth(authInstance);
-                        setDb(dbInstance);
-                        firebaseEnabled = true;
-                        setFirebaseReady(true);
-                    } catch (e) {
-                        console.warn("Fallo Firebase, Modo Local activo:", e);
-                        initializeLocalSongs();
+                const cancionesRef = db.ref('canciones');
+                cancionesRef.on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        const listaCargada = Object.keys(data).map(key => ({
+                            id: key,
+                            ...data[key]
+                        }));
+                        setCanciones(listaCargada);
+                    } else {
+                        setCanciones([]);
                     }
-                };
-
-                const initializeLocalSongs = () => {
-                    const savedSongs = localStorage.getItem('psicosis_local_songs');
-                    if (savedSongs) {
-                        try {
-                            const parsedSongs = JSON.parse(savedSongs).map((track, idx) => ({ ...track, id: track.id || `local_song_${idx}_${Date.now()}` }));
-                            setCloudSongs(parsedSongs);
-                        } catch (e) { setCloudSongs([]); }
-                    }
-                    if (localStorage.getItem('psicosis_admin') === 'true') setIsAdmin(true);
-                };
-
-                loadFirebase();
+                });
+                return () => cancionesRef.off();
             }, []);
 
+            // Control de reproducción de audio
             useEffect(() => {
-                if (!firebaseReady || !auth) return;
-                const { signInAnonymously, onAuthStateChanged } = window.firebaseMethods;
-                const initAuth = async () => { try { await signInAnonymously(auth); } catch (err) {} };
-                initAuth();
-                
-                const unsubscribe = onAuthStateChanged(auth, (usr) => {
-                    setUser(usr);
-                    if (localStorage.getItem('psicosis_admin') === 'true') setIsAdmin(true);
-                });
-                return () => unsubscribe();
-            }, [firebaseReady, auth]);
-
-            useEffect(() => {
-                if (!firebaseReady || !db || !user) return;
-                const { collection, onSnapshot, doc } = window.firebaseMethods;
-                const songsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'songs');
-                const settingsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'deleted_defaults');
-                
-                const unsubscribeSongs = onSnapshot(songsColRef, (snapshot) => {
-                    const cloudSongsList = [];
-                    snapshot.forEach((doc) => {
-                        const data = doc.data();
-                        cloudSongsList.push({ ...data, id: data.id || doc.id });
-                    });
-                    cloudSongsList.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-                    setCloudSongs(cloudSongsList);
-                });
-
-                const unsubscribeSettings = onSnapshot(settingsDocRef, (docSnap) => {
-                    if (docSnap.exists()) setDeletedDefaultIds(docSnap.data().ids || []);
-                });
-                
-                return () => { unsubscribeSongs(); unsubscribeSettings(); };
-            }, [firebaseReady, db, user]);
-
-            const visibleDefaults = defaultSongs.filter(s => !deletedDefaultIds.includes(s.id));
-            const playlist = [...visibleDefaults, ...cloudSongs];
-            const currentTrack = playlist[currentTrackIndex];
-            const coverSrc = currentTrack?.cover || "";
-            const fallbackCover = "https://placehold.co/600x600/03000a/c026d3?text=PSICOSIS+NEON";
-
-            useEffect(() => {
-                if (!currentTrack) return;
-                setResolvedAudioSrc(currentTrack.src);
-            }, [currentTrackIndex, playlist]);
-
-            useEffect(() => {
-                if (audioRef.current && resolvedAudioSrc) {
-                    audioRef.current.load();
-                    if (isPlaying) {
-                        const playPromise = audioRef.current.play();
-                        if (playPromise !== undefined) playPromise.catch(e => { setIsPlaying(false); });
+                if (audioRef.current) {
+                    if (isPlaying && canciones.length > 0) {
+                        audioRef.current.play().catch(() => setIsPlaying(false));
+                    } else {
+                        audioRef.current.pause();
                     }
                 }
-            }, [resolvedAudioSrc]);
+            }, [isPlaying, currentTrackIndex, canciones]);
 
-            const handleAdminAccess = () => {
-                if (isAdmin) return;
-                setShowAdminModal(true);
+            const actualizarProgreso = () => {
+                if (audioRef.current) setProgress(audioRef.current.currentTime);
             };
 
-            const handleAdminSubmit = () => {
-                if (adminPasswordInput === "psicosis") {
-                    setIsAdmin(true);
-                    localStorage.setItem('psicosis_admin', 'true');
-                    setErrorMessage("¡Panel Creador Desbloqueado! 🔓");
-                    setShowAdminModal(false);
-                    setAdminPasswordInput("");
-                    setTimeout(() => setErrorMessage(""), 3000);
-                } else {
-                    setErrorMessage("Clave incorrecta ❌");
-                    setAdminPasswordInput("");
-                    setTimeout(() => setErrorMessage(""), 3000);
+            const metadataCargada = () => {
+                if (audioRef.current) setDuration(audioRef.current.duration);
+            };
+
+            const cambiarProgreso = (e) => {
+                const nuevoTiempo = parseFloat(e.target.value);
+                if (audioRef.current) {
+                    audioRef.current.currentTime = nuevoTiempo;
+                    setProgress(nuevoTiempo);
                 }
             };
 
-            const closeAndSaveAdminPanel = () => {
-                setIsAdmin(false);
-                localStorage.removeItem('psicosis_admin');
-                setErrorMessage("¡Cambios Guardados! Panel cerrado de forma segura. 🔒");
-                setTimeout(() => setErrorMessage(""), 4000);
-            };
-
-            const handleAddTrack = async (e) => {
+            const agregarCancionFirebase = (e) => {
                 e.preventDefault();
-                const urlToAdd = inputUrl.trim();
-                if (!urlToAdd) return;
+                if (!nuevoTitulo || !nuevoMp3Url) return alert("Completa el título y la URL de música");
 
-                const isDuplicate = playlist.some(track => track.src === urlToAdd);
-                if (isDuplicate) {
-                    setErrorMessage("⚠️ Este enlace ya está en la cola.");
-                    setTimeout(() => setErrorMessage(""), 3000);
-                    return;
-                }
+                const nuevaCancion = {
+                    titulo: nuevoTitulo,
+                    artista: nuevoArtista || "Artista Desconocido",
+                    url: nuevoMp3Url,
+                    portada: nuevaPortadaUrl || "https://unsplash.com"
+                };
 
-                setErrorMessage("Extrayendo ID3 y Carátula original del MP3... 💽");
+                db.ref('canciones').push(nuevaCancion);
 
-                const urlParts = urlToAdd.split('/');
-                let decodedTitle = decodeURIComponent(urlParts[urlParts.length - 1]);
-                let baseName = decodedTitle.replace(/\.[a-zA-Z0-9]+$/i, ''); 
-
-                let finalTitle = baseName;
-                let finalArtist = "Artista Desconocido";
-                let finalAlbum = "Sencillo";
-                let finalCover = fallbackCover;
-
-                try {
-                    // Descargamos los primeros 2.5 MB para asegurar que leemos la imagen en alta calidad incrustada
-                    const bypassUrl = urlToAdd + (urlToAdd.includes('?') ? '&' : '?') + '_psicosis_id3_bypass=' + Date.now();
-                    const response = await fetch(bypassUrl, { mode: 'cors' });
-                    
-                    if (response.ok) {
-                        const reader = response.body.getReader();
-                        const chunks = [];
-                        let receivedLength = 0;
-                        const maxBytesToRead = 2.5 * 1024 * 1024; // 2.5 MB
-
-                        while (true) {
-                            const { done, value } = await reader.read();
-                            if (done) break;
-                            chunks.push(value);
-                            receivedLength += value.length;
-                            if (receivedLength >= maxBytesToRead) { await reader.cancel(); break; }
-                        }
-
-                        const mergedBuffer = new Uint8Array(receivedLength);
-                        let position = 0;
-                        for (let chunk of chunks) {
-                            mergedBuffer.set(chunk, position);
-                            position += chunk.length;
-                        }
-
-                        const audioBlob = new Blob([mergedBuffer], { type: 'audio/mpeg' });
-
-                        const tags = await new Promise((resolve, reject) => {
-                            if (window.jsmediatags) {
-                                window.jsmediatags.read(audioBlob, { onSuccess: (tag) => resolve(tag.tags), onError: (err) => reject(err) });
-                            } else { reject("Librería de metadatos no disponible"); }
-                        });
-
-                        if (tags) {
-                            if (tags.title) finalTitle = tags.title;
-                            if (tags.artist) finalArtist = tags.artist;
-                            if (tags.album) finalAlbum = tags.album;
-                            
-                            if (tags.picture) {
-                                const { data, format } = tags.picture;
-                                let base64String = "";
-                                const bytes = new Uint8Array(data);
-                                // Procesamiento nativo y robusto para evitar colapsos de memoria
-                                const CHUNK_SIZE = 0x8000; 
-                                for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
-                                    base64String += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK_SIZE));
-                                }
-                                finalCover = `data:${format};base64,${btoa(base64String)}`;
-                            }
-                        }
-                    }
-                } catch (err) {
-                    console.log("No se detectó un ID3 tag válido en los primeros 2.5MB del MP3 o el servidor bloqueó la lectura.", err);
-                }
-
-                const newTrack = { id: 'song_' + Date.now(), title: finalTitle, artist: finalArtist, album: finalAlbum, src: urlToAdd, cover: finalCover, createdAt: Date.now() };
-
-                if (firebaseEnabled && db && user) {
-                    const { doc, setDoc } = window.firebaseMethods;
-                    try {
-                        const songDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'songs', newTrack.id);
-                        await setDoc(songDocRef, newTrack);
-                        setErrorMessage("¡Todo incrustado y guardado en la nube automáticamente! 🎉🔥");
-                    } catch (err) { setErrorMessage("Error de permisos en Firebase ❌"); }
-                } else {
-                    const updatedSongs = [...cloudSongs, newTrack];
-                    localStorage.setItem('psicosis_local_songs', JSON.stringify(updatedSongs));
-                    setCloudSongs(updatedSongs);
-                    setErrorMessage("¡Guardado localmente! ⚠️");
-                }
-
-                setInputUrl("");
-                setTimeout(() => setErrorMessage(""), 4000);
+                setNuevoTitulo("");
+                setNuevoArtista("");
+                setNuevoMp3Url("");
+                setNuevaPortadaUrl("");
+                setPanelAbierto(false);
             };
 
-            const removeTrack = async (index, e) => {
-                e.stopPropagation();
-                const trackToDelete = playlist[index];
-                if (!trackToDelete) return;
-                
-                const trackId = trackToDelete.id || '';
-                setErrorMessage("Eliminando... 🗑️");
-                
-                if (trackId.startsWith("default_")) {
-                    const updatedDeleted = [...deletedDefaultIds, trackId];
-                    if (firebaseEnabled && db && user) {
-                        const { doc, setDoc } = window.firebaseMethods;
-                        try {
-                            const settingsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'deleted_defaults');
-                            await setDoc(settingsDocRef, { ids: updatedDeleted });
-                            setErrorMessage("¡Pista eliminada de la nube! ✅");
-                        } catch (err) { setErrorMessage("Fallo al borrar en la nube ❌"); }
-                    }
-                } else {
-                    if (firebaseEnabled && db && user) {
-                        const { doc, deleteDoc } = window.firebaseMethods;
-                        try {
-                            const songDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'songs', trackId);
-                            await deleteDoc(songDocRef);
-                            setErrorMessage("¡Track eliminado permanentemente de la base de datos! ✅");
-                        } catch (err) { setErrorMessage("Fallo al borrar en la nube ❌"); }
-                    }
-                }
-
-                if (currentTrackIndex === index) {
-                    setCurrentTrackIndex(0);
-                    setIsPlaying(false);
-                } else if (currentTrackIndex > index) {
-                    setCurrentTrackIndex(currentTrackIndex - 1);
-                }
-                setTimeout(() => setErrorMessage(""), 3000);
-            };
-
-            const playTrack = (index) => {
-                if (isBuffering) return;
-                setCurrentTrackIndex(index);
-                setIsPlaying(true);
-            };
-
-            const togglePlay = async () => {
-                if (!resolvedAudioSrc || isBuffering) return;
-                if (isPlaying) { audioRef.current.pause(); setIsPlaying(false); } 
-                else {
-                    try { await audioRef.current.play(); setIsPlaying(true); setErrorMessage(""); } 
-                    catch (error) { setIsPlaying(false); setErrorMessage("Error. ¿Enlace termina en .mp3? ❌"); setTimeout(() => setErrorMessage(""), 5000); }
+            const eliminarCancionFirebase = (id) => {
+                if (confirm("¿Eliminar canción de la nube?")) {
+                    db.ref(`canciones/${id}`).remove();
                 }
             };
 
-            const handleTimeUpdate = () => setProgress(audioRef.current.currentTime);
-            const handleLoadedMetadata = () => setDuration(audioRef.current.duration);
-            const handleProgressChange = (e) => { const newTime = e.target.value; if(audioRef.current) audioRef.current.currentTime = newTime; setProgress(newTime); };
-            const handleVolumeChange = (e) => { const newVolume = parseFloat(e.target.value); setVolume(newVolume); if (audioRef.current) audioRef.current.volume = newVolume; setIsMuted(newVolume === 0); };
-            const toggleMute = () => { if (isMuted) { if(audioRef.current) audioRef.current.volume = volume || 0.5; setIsMuted(false); } else { if(audioRef.current) audioRef.current.volume = 0; setIsMuted(true); } };
-            const handleNext = () => { if (isBuffering) return; setCurrentTrackIndex((prev) => (prev + 1) % playlist.length); };
-            const handlePrev = () => { if (isBuffering) return; setCurrentTrackIndex((prev) => (prev - 1 + playlist.length) % playlist.length); };
-            const handleDownload = async () => { try { setErrorMessage("Abriendo descarga... ⏳"); window.open(resolvedAudioSrc, '_blank'); setTimeout(() => setErrorMessage(""), 3000); } catch (error) { setErrorMessage("Error al descargar."); } };
-            const formatTime = (time) => { if (!time || isNaN(time)) return "0:00"; const minutes = Math.floor(time / 60); const seconds = Math.floor(time % 60); return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`; };
+            const cancionActual = canciones[currentTrackIndex] || {
+                titulo: "Sin canciones",
+                artista: "Usa el panel de creador",
+                portada: "https://unsplash.com",
+                url: ""
+            };
 
             return (
-                <div className="min-h-screen w-full font-sans text-neutral-200 selection:bg-cyan-500 selection:text-black flex flex-col items-center justify-center p-4 relative overflow-hidden bg-[#03000a]">
-                    <div className="absolute top-[-15%] left-[-15%] w-[50vw] h-[50vw] bg-fuchsia-600/15 rounded-full blur-[140px] pointer-events-none animate-pulse"></div>
-                    <div className="absolute bottom-[-15%] right-[-15%] w-[50vw] h-[50vw] bg-cyan-600/15 rounded-full blur-[140px] pointer-events-none animate-pulse" style={{ animationDelay: '1s' }}></div>
-                    <div className="absolute top-1/2 left-1/3 w-[30vw] h-[30vw] bg-violet-600/10 rounded-full blur-[120px] pointer-events-none"></div>
-
-                    {errorMessage && (
-                        <div className="absolute top-6 z-50 bg-[#060012]/95 border-2 border-cyan-500 text-cyan-300 px-6 py-3 rounded-md shadow-[0_0_20px_rgba(6,182,212,0.8)] font-bold text-sm tracking-widest uppercase flex items-center gap-3 backdrop-blur-md">
-                            <ZapIcon size={18} className="text-cyan-400 animate-bounce" /> {errorMessage}
-                        </div>
-                    )}
-
-                    {showAdminModal && (
-                        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4">
-                            <div className="w-full max-w-md bg-[#090514] border-2 border-fuchsia-500 rounded-2xl p-6 shadow-[0_0_30px_rgba(217,70,239,0.5)] relative">
-                                <button onClick={() => { setShowAdminModal(false); setAdminPasswordInput(""); }} className="absolute top-4 right-4 text-neutral-400 hover:text-fuchsia-400 transition-colors">
-                                    <XIcon size={20} />
-                                </button>
-                                <h3 className="text-xl font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 mb-4 neon-text-fuchsia flex items-center gap-2">
-                                    <ZapIcon size={20} className="text-fuchsia-500" />
-                                    Acceso Restringido
-                                </h3>
-                                <input type="password" placeholder="Contraseña..." value={adminPasswordInput} onChange={(e) => setAdminPasswordInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleAdminSubmit(); }} className="w-full bg-black/60 border border-fuchsia-500/40 rounded-lg px-4 py-3 text-sm text-fuchsia-200 focus:outline-none focus:border-fuchsia-400 focus:shadow-[0_0_15px_rgba(217,70,239,0.5)] transition-all placeholder:text-fuchsia-900/60 mb-6" autoFocus />
-                                <div className="flex gap-3 justify-end">
-                                    <button onClick={() => { setShowAdminModal(false); setAdminPasswordInput(""); }} className="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider text-neutral-400 hover:text-white transition-colors">Cancelar</button>
-                                    <button onClick={handleAdminSubmit} className="px-5 py-2.5 bg-fuchsia-600 hover:bg-fuchsia-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-all hover:shadow-[0_0_15px_rgba(217,70,239,0.8)]">Verificar</button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="w-full max-w-4xl bg-black/60 backdrop-blur-2xl border border-cyan-500/30 rounded-3xl shadow-[0_0_40px_rgba(6,182,212,0.25)] overflow-hidden flex flex-col md:flex-row z-10">
-                        
-                        <div className="w-full md:w-1/2 p-8 flex flex-col items-center justify-between border-b md:border-b-0 md:border-r border-cyan-500/20 relative">
-                            <div className="w-full flex justify-between items-center mb-8">
-                                <h1 className="text-2xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-green-400 uppercase flex items-center gap-2 select-none">
-                                    <div onClick={handleAdminAccess} className="cursor-pointer hover:scale-110 transition-transform active:scale-95" title="Acceso a panel">
-                                        <DiscIcon className="text-cyan-400 animate-spin-slow neon-text-cyan" style={{ animationPlayState: isPlaying && !isBuffering ? 'running' : 'paused' }} />
-                                    </div>
-                                    <span className="neon-text-cyan">Psicosis</span>
-                                </h1>
-                                <button onClick={handleDownload} disabled={isBuffering} className="bg-black/40 hover:bg-cyan-500 text-cyan-400 hover:text-black transition-all p-2 rounded-full border border-cyan-500/40 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.8)] disabled:opacity-30" title="Descargar Audio">
-                                    <DownloadIcon size={18} />
-                                </button>
-                            </div>
-
-                            <div className="relative group w-64 h-64 mb-8">
-                                <div className={`absolute inset-0 bg-gradient-to-tr from-cyan-500 to-fuchsia-500 rounded-full blur-2xl opacity-40 transition-opacity ${isPlaying && !isBuffering ? 'animate-pulse opacity-70' : 'opacity-20'}`}></div>
-                                <div className="absolute inset-0 rounded-full border-2 border-fuchsia-500 shadow-[0_0_20px_rgba(217,70,239,0.7)] z-10"></div>
-                                <img src={coverSrc} alt="Cover" className={`w-full h-full object-cover rounded-full border-[6px] border-black shadow-2xl relative z-10 transition-transform duration-[10s] ease-linear ${isPlaying && !isBuffering ? 'rotate-[360deg] animate-spin-slow' : ''}`} onError={(e) => { e.target.src = fallbackCover; }} style={{ animationPlayState: isPlaying && !isBuffering ? 'running' : 'paused' }} />
-                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-[#03000a] rounded-full border-4 border-cyan-500/60 z-30 flex items-center justify-center">
-                                    <div className="w-2 h-2 bg-fuchsia-500 rounded-full"></div>
-                                </div>
-                            </div>
-
-                            <div className="text-center w-full mb-8">
-                                <h2 className="text-3xl font-black uppercase tracking-wide text-white truncate mb-1 neon-text-fuchsia" title={currentTrack?.title}>{currentTrack?.title || "Sin Pista"}</h2>
-                                <p className="text-cyan-400 font-bold tracking-widest text-sm uppercase neon-text-cyan">{currentTrack?.artist || "---"}</p>
-                            </div>
-
-                            <div className="w-full flex items-center gap-4 mb-6 font-mono text-xs text-cyan-400/80">
-                                <span className="neon-text-cyan">{formatTime(progress)}</span>
-                                <div className="relative flex-1 h-2 bg-neutral-900 rounded-full group border border-cyan-500/20 shadow-[inset_0_0_5px_rgba(6,182,212,0.3)]">
-                                    <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-400 to-fuchsia-500 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.8)]" style={{ width: `${duration ? (progress / duration) * 100 : 0}%` }}></div>
-                                    <input type="range" min="0" max={duration || 100} value={progress} onChange={handleProgressChange} disabled={isBuffering} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-20 text-cyan-400" />
-                                </div>
-                                <span className="neon-text-cyan">{formatTime(duration)}</span>
-                            </div>
-
-                            <div className="flex items-center gap-8">
-                                <button onClick={handlePrev} disabled={isBuffering} className="text-neutral-400 hover:text-cyan-400 hover:drop-shadow-[0_0_10px_rgba(6,182,212,1)] transition-all active:scale-90 disabled:opacity-30"><SkipBackIcon size={28} fill="currentColor" /></button>
-                                <button onClick={togglePlay} disabled={isBuffering} className="w-16 h-16 flex items-center justify-center bg-transparent border-2 border-cyan-400 text-cyan-400 rounded-full neon-glow-btn disabled:opacity-40">{isPlaying && !isBuffering ? <PauseIcon size={30} fill="currentColor" /> : <PlayIcon size={30} fill="currentColor" className="ml-1" />}</button>
-                                <button onClick={handleNext} disabled={isBuffering} className="text-neutral-400 hover:text-cyan-400 hover:drop-shadow-[0_0_10px_rgba(6,182,212,1)] transition-all active:scale-90 disabled:opacity-30"><SkipForwardIcon size={28} fill="currentColor" /></button>
-                            </div>
-                        </div>
-
-                        <div className="w-full md:w-1/2 p-6 flex flex-col bg-black/80">
-                            
-                            {isAdmin && (
-                                <div className="mb-6 border border-fuchsia-500/40 pb-5 relative bg-[#090514]/90 p-4 rounded-xl shadow-[0_0_20px_rgba(217,70,239,0.2)]">
-                                    
-                                    <button 
-                                        onClick={closeAndSaveAdminPanel}
-                                        className="absolute top-2 right-2 text-fuchsia-400 hover:text-red-500 transition-colors bg-black/50 p-1.5 rounded-full border border-fuchsia-500/30 hover:border-red-500"
-                                        title="Cerrar Panel"
-                                    >
-                                        <XIcon size={16} />
-                                    </button>
-
-                                    <h3 className="text-xs font-bold text-fuchsia-400 uppercase tracking-widest mb-4 flex items-center gap-2 neon-text-fuchsia">
-                                        <ZapIcon size={14} /> Panel Creador Activo
-                                    </h3>
-
-                                    <form onSubmit={handleAddTrack} className="mb-2">
-                                        <label className="text-[10px] text-neutral-400 uppercase tracking-widest mb-1.5 block">Inyectar URL MP3</label>
-                                        <div className="flex gap-2">
-                                            <input 
-                                                type="url" 
-                                                placeholder="Pega enlace de Archive.org..." 
-                                                value={inputUrl}
-                                                onChange={(e) => setInputUrl(e.target.value)}
-                                                className="flex-1 bg-black/80 border border-fuchsia-500/30 rounded-lg px-3 py-2 text-sm text-fuchsia-200 focus:outline-none focus:border-fuchsia-400 focus:shadow-[0_0_15px_rgba(217,70,239,0.5)] transition-all placeholder:text-fuchsia-900/60"
-                                                required
-                                            />
-                                            <button 
-                                                type="submit" 
-                                                className="bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-3 py-2 rounded-lg font-bold transition-all hover:shadow-[0_0_15px_rgba(217,70,239,0.8)] active:scale-95 flex items-center justify-center"
-                                                title="Inyectar MP3"
-                                            >
-                                                <PlusIcon size={18} />
-                                            </button>
-                                        </div>
-                                    </form>
-
-                                    <div className="flex justify-end mt-4 border-t border-fuchsia-500/20 pt-3">
-                                        <button 
-                                            onClick={closeAndSaveAdminPanel}
-                                            className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all shadow-[0_0_10px_rgba(34,197,94,0.4)] hover:shadow-[0_0_15px_rgba(34,197,94,0.8)] flex items-center gap-2"
-                                        >
-                                            <CheckIcon size={14} /> Guardar Cambios y Cerrar (X)
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="flex items-center gap-3 bg-black/40 p-3 rounded-lg mb-6 border border-green-500/20 shadow-[inset_0_0_10px_rgba(34,197,94,0.1)]">
-                                <button onClick={toggleMute} className="text-green-500 hover:text-green-300 transition-colors drop-shadow-[0_0_5px_rgba(34,197,94,0.5)]">{isMuted || volume === 0 ? <VolumeXIcon size={18} /> : <Volume2Icon size={18} />}</button>
-                                <input type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={handleVolumeChange} className="w-full h-1 bg-neutral-900 rounded-full appearance-none cursor-pointer text-green-400" />
-                            </div>
-
-                            <h3 className="text-sm font-black uppercase tracking-widest text-cyan-400 mb-4 flex items-center gap-2 neon-text-cyan"><MusicIcon size={16} /> Cola de Reproducción</h3>
-
-                            <div className="relative mb-6">
-                                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-500" size={16} />
-                                <input type="text" placeholder="Buscar canción o artista..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-black/60 border border-cyan-500/20 rounded-lg pl-10 pr-4 py-2.5 text-sm text-cyan-100 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all placeholder:text-cyan-900" />
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                                {playlist
-                                    .map((track, originalIndex) => ({ ...track, originalIndex }))
-                                    .filter(track => track.title.toLowerCase().includes(searchTerm.toLowerCase()) || track.artist.toLowerCase().includes(searchTerm.toLowerCase()))
-                                    .map((track) => {
-                                    const isActive = currentTrackIndex === track.originalIndex;
-                                    return (
-                                        <div key={track.id} onClick={() => playTrack(track.originalIndex)} className={`group relative flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-all border ${isActive ? 'bg-cyan-950/20 border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)]' : 'bg-black/40 border-transparent hover:bg-neutral-900/60 hover:border-cyan-500/20'}`}>
-                                            <div className="w-12 h-12 relative flex-shrink-0 overflow-hidden rounded-md border border-cyan-500/10">
-                                                <img src={track.cover} alt="Cover" className="w-full h-full object-cover" onError={(e) => { e.target.src = fallbackCover; }} />
-                                                {isActive && isPlaying && !isBuffering && (
-                                                    <div className="absolute inset-0 bg-black/75 flex items-center justify-center gap-0.5">
-                                                        <div className="w-1 h-3 bg-cyan-400 shadow-[0_0_5px_#22d3ee] animate-[bounce_1s_infinite]"></div>
-                                                        <div className="w-1 h-5 bg-fuchsia-500 shadow-[0_0_5px_#d946ef] animate-[bounce_1.2s_infinite] [animation-delay:0.2s]"></div>
-                                                        <div className="w-1 h-2 bg-green-400 shadow-[0_0_5px_#4ade80] animate-[bounce_0.8s_infinite] [animation-delay:0.4s]"></div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            
-                                            <div className="flex flex-col flex-1 min-w-0">
-                                                <span className={`font-bold uppercase truncate text-sm tracking-wider ${isActive ? 'text-cyan-400 neon-text-cyan' : 'text-neutral-200'}`}>{track.title} {!(track.id || '').startsWith("default_") && <span className="text-[9px] text-fuchsia-400 border border-fuchsia-500/30 px-1 rounded ml-1 lowercase tracking-normal">cloud</span>}</span>
-                                                <span className="text-xs text-neutral-500 uppercase tracking-widest truncate">{track.artist}</span>
-                                            </div>
-
-                                            {isAdmin && (
-                                                <button onClick={(e) => removeTrack(track.originalIndex, e)} className="p-2 text-neutral-600 hover:text-red-500 hover:drop-shadow-[0_0_8px_rgba(239,68,68,1)] opacity-0 group-hover:opacity-100 transition-all active:scale-90" title="Eliminar"><TrashIcon size={16} /></button>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                                
-                                {playlist.filter(track => track.title.toLowerCase().includes(searchTerm.toLowerCase()) || track.artist.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
-                                    <div className="text-center text-cyan-800 text-xs py-8 uppercase tracking-widest neon-text-cyan opacity-50">No hay pistas que coincidan con "{searchTerm}".</div>
-                                )}
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <audio ref={audioRef} src={resolvedAudioSrc} onTimeUpdate={handleTimeUpdate} onLoadedMetadata={handleLoadedMetadata} onEnded={handleNext} />
-                </div>
-            );
-        }
-
-        const root = createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
