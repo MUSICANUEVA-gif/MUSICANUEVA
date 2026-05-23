@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Psicosis Music - Neon Cyberpunk</title>
     
-    <!-- Librerías Externas -->
-    <script src="https://tailwindcss.com"></script>
-    <script src="https://unpkg.com"></script>
-    <script src="https://unpkg.com"></script>
-    <script src="https://unpkg.com"></script>
-    <script src="https://cloudflare.com"></script>
+    <!-- Tailwind CSS para el diseño -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- SDK de Firebase (Compatibilidad Global) -->
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
+    <!-- Librerías de React, ReactDOM y Babel CORRECTAS -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- SDK de Firebase CORRECTO (Versión de compatibilidad) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         body { 
@@ -59,16 +60,6 @@
             background-color: rgba(6, 182, 212, 0.6);
             box-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
         }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 14px;
-            width: 14px;
-            border-radius: 50%;
-            background: #ffffff;
-            cursor: pointer;
-            box-shadow: 0 0 12px currentColor;
-            border: 2px solid #03000a;
-        }
     </style>
 </head>
 <body class="bg-[#03000a] text-neutral-200">
@@ -77,7 +68,6 @@
 
     <script type="text/babel">
         const { useState, useRef, useEffect } = React;
-        const { createRoot } = ReactDOM;
 
         // --- CONFIGURACIÓN DE TU PROYECTO PSICOSISMUSIC ---
         const firebaseConfig = {
@@ -87,24 +77,21 @@
             projectId: "psicosismusic-2b04a",
             storageBucket: "psicosismusic-2b04a.firebasestorage.app",
             messagingSenderId: "233441166744",
-            appId: "1:233441166744:web:6757b5fb8d4fd1803697ed",
-            measurementId: "G-Q5T61C2MNE"
+            appId: "1:233441166744:web:6757b5fb8d4fd1803697ed"
         };
 
-        // Inicializar Firebase
+        // Inicializar Firebase de forma segura
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
         const db = firebase.database();
 
-        // --- ICONOS ---
-        const PlayIcon = ({ size = 24, ...props }) => <svg xmlns="http://w3.org" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="5 3 19 12 5 21 5 3"/></svg>;
-        const PauseIcon = ({ size = 24, ...props }) => <svg xmlns="http://w3.org" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>;
-        const SkipForwardIcon = ({ size = 24, ...props }) => <svg xmlns="http://w3.org" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>;
-        const SkipBackIcon = ({ size = 24, ...props }) => <svg xmlns="http://w3.org" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="5" x2="5" y2="19"/></svg>;
-        const Volume2Icon = ({ size = 24, ...props }) => <svg xmlns="http://w3.org" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>;
-        const TrashIcon = ({ size = 24, ...props }) => <svg xmlns="http://w3.org" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>;
-        const PlusIcon = ({ size = 24, ...props }) => <svg xmlns="http://w3.org" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
+        // --- ICONOS SVG ---
+        const PlayIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>;
+        const PauseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>;
+        const SkipForwardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" strokeWidth="2"/></svg>;
+        const SkipBackIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="5" x2="5" y2="19" stroke="currentColor" strokeWidth="2"/></svg>;
+        const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>;
 
         function App() {
             const [canciones, setCanciones] = useState([]);
@@ -114,6 +101,7 @@
             const [duration, setDuration] = useState(0);
             const [panelAbierto, setPanelAbierto] = useState(false);
 
+            // Formulario nueva canción
             const [nuevoTitulo, setNuevoTitulo] = useState("");
             const [nuevoArtista, setNuevoArtista] = useState("");
             const [nuevoMp3Url, setNuevoMp3Url] = useState("");
@@ -121,7 +109,7 @@
 
             const audioRef = useRef(null);
 
-            // Escuchar cambios en la base de datos
+            // Conectar con Firebase Realtime Database
             useEffect(() => {
                 const cancionesRef = db.ref('canciones');
                 cancionesRef.on('value', (snapshot) => {
@@ -139,7 +127,7 @@
                 return () => cancionesRef.off();
             }, []);
 
-            // Control de reproducción de audio
+            // Control de reproducción
             useEffect(() => {
                 if (audioRef.current) {
                     if (isPlaying && canciones.length > 0) {
@@ -149,6 +137,13 @@
                     }
                 }
             }, [isPlaying, currentTrackIndex, canciones]);
+
+            const trackActual = canciones[currentTrackIndex] || {
+                titulo: "Sin canciones",
+                artista: "Sube música en el panel",
+                mp3Url: "",
+                portadaUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500"
+            };
 
             const actualizarProgreso = () => {
                 if (audioRef.current) setProgress(audioRef.current.currentTime);
@@ -161,4 +156,171 @@
             const cambiarProgreso = (e) => {
                 const nuevoTiempo = parseFloat(e.target.value);
                 if (audioRef.current) {
-                    audioRef.current.currentTime
+                    audioRef.current.currentTime = nuevoTiempo;
+                    setProgress(nuevoTiempo);
+                }
+            };
+
+            const alternarReproduccion = () => {
+                if(canciones.length > 0) setIsPlaying(!isPlaying);
+            };
+
+            const siguienteCancion = () => {
+                if (canciones.length > 0) {
+                    setCurrentTrackIndex((prev) => (prev + 1) % canciones.length);
+                    setIsPlaying(true);
+                }
+            };
+
+            const anteriorCancion = () => {
+                if (canciones.length > 0) {
+                    setCurrentTrackIndex((prev) => (prev - 1 + canciones.length) % canciones.length);
+                    setIsPlaying(true);
+                }
+            };
+
+            // Guardar en Firebase
+            const guardarCancion = (e) => {
+                e.preventDefault();
+                if (!nuevoTitulo || !nuevoMp3Url) return alert("Título y Enlace MP3 obligatorios");
+
+                db.ref('canciones').push({
+                    titulo: nuevoTitulo,
+                    artista: nuevoArtista || "Artista Desconocido",
+                    mp3Url: nuevoMp3Url,
+                    portadaUrl: nuevaPortadaUrl || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500"
+                });
+
+                setNuevoTitulo("");
+                setNuevoArtista("");
+                setNuevoMp3Url("");
+                setNuevaPortadaUrl("");
+            };
+
+            // Eliminar de Firebase
+            const eliminarCancion = (id) => {
+                if(confirm("¿Eliminar esta canción?")) {
+                    db.ref(`canciones/${id}`).remove();
+                    setCurrentTrackIndex(0);
+                }
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#05010e] relative overflow-hidden">
+                    
+                    {/* Elemento de Audio Oculto */}
+                    <audio 
+                        ref={audioRef} 
+                        src={trackActual.mp3Url} 
+                        onTimeUpdate={actualizarProgreso} 
+                        onLoadedMetadata={metadataCargada}
+                        onEnded={siguienteCancion}
+                    />
+
+                    {/* Contenedor Principal */}
+                    <div className="w-full max-w-md bg-[#0c061f]/90 border border-cyan-500/30 rounded-3xl p-6 backdrop-blur-xl z-10 shadow-2xl relative">
+                        
+                        {/* Encabezado */}
+                        <div className="flex justify-between items-center mb-6">
+                            <h1 className="text-xl font-black uppercase tracking-widest neon-text-cyan text-cyan-400">Psicosis Music</h1>
+                            <button 
+                                onClick={() => setPanelAbierto(!panelAbierto)}
+                                className="px-3 py-1 text-xs border border-fuchsia-500 text-fuchsia-400 rounded-full hover:bg-fuchsia-500/20 transition"
+                            >
+                                {panelAbierto ? "Cerrar Panel" : "Añadir Música"}
+                            </button>
+                        </div>
+
+                        {/* Panel de administración ocultable */}
+                        {panelAbierto && (
+                            <form onSubmit={guardarCancion} className="mb-6 p-4 bg-black/40 border border-fuchsia-500/30 rounded-xl space-y-3">
+                                <h3 className="text-sm font-bold text-fuchsia-400 uppercase">Agregar a la Base de Datos</h3>
+                                <input type="text" placeholder="Título" value={nuevoTitulo} onChange={e=>setNuevoTitulo(e.target.value)} className="w-full bg-[#150d33] p-2 text-xs rounded border border-cyan-500/20 focus:outline-none focus:border-cyan-400"/>
+                                <input type="text" placeholder="Artista" value={nuevoArtista} onChange={e=>setNuevoArtista(e.target.value)} className="w-full bg-[#150d33] p-2 text-xs rounded border border-cyan-500/20 focus:outline-none focus:border-cyan-400"/>
+                                <input type="text" placeholder="URL del archivo MP3" value={nuevoMp3Url} onChange={e=>setNuevoMp3Url(e.target.value)} className="w-full bg-[#150d33] p-2 text-xs rounded border border-cyan-500/20 focus:outline-none focus:border-cyan-400"/>
+                                <input type="text" placeholder="URL de la Imagen de Portada" value={nuevaPortadaUrl} onChange={e=>setNuevaPortadaUrl(e.target.value)} className="w-full bg-[#150d33] p-2 text-xs rounded border border-cyan-500/20 focus:outline-none focus:border-cyan-400"/>
+                                <button type="submit" className="w-full py-2 bg-gradient-to-r from-cyan-500 to-fuchsia-500 font-bold text-xs rounded text-black uppercase tracking-wider">Guardar en Firebase</button>
+                            </form>
+                        )}
+
+                        {/* Portada en Disco Giratorio */}
+                        <div className="flex justify-center my-6">
+                            <div className={`w-52 h-52 rounded-full border-4 border-cyan-400/40 p-2 shadow-[0_0_30px_rgba(6,182,212,0.2)] ${isPlaying ? 'animate-spin-slow' : ''}`}>
+                                <img 
+                                    src={trackActual.portadaUrl} 
+                                    alt="Portada" 
+                                    className="w-full h-full object-cover rounded-full"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Info de la Canción */}
+                        <div className="text-center mb-6">
+                            <h2 className="text-xl font-bold tracking-wide text-white truncate px-4">{trackActual.titulo}</h2>
+                            <p className="text-sm text-fuchsia-400 font-medium tracking-wide mt-1">{trackActual.artista}</p>
+                        </div>
+
+                        {/* Barra de Progreso */}
+                        <div className="mb-6">
+                            <input 
+                                type="range" 
+                                min="0" 
+                                max={duration || 0} 
+                                value={progress} 
+                                onChange={cambiarProgreso}
+                                className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer text-cyan-400"
+                            />
+                            <div className="flex justify-between text-xs text-neutral-400 mt-2 font-mono">
+                                <span>{Math.floor(progress/60)}:{( "0" + Math.floor(progress%60) ).slice(-2)}</span>
+                                <span>{duration ? `${Math.floor(duration/60)}:${("0"+Math.floor(duration%60)).slice(-2)}` : "0:00"}</span>
+                            </div>
+                        </div>
+
+                        {/* Controles del Reproductor */}
+                        <div className="flex justify-center items-center gap-6 mb-6">
+                            <button onClick={anteriorCancion} className="text-cyan-400 hover:text-cyan-300 p-2 transition">
+                                <SkipBackIcon />
+                            </button>
+                            <button onClick={alternarReproduccion} className="w-14 h-14 bg-cyan-500 text-black rounded-full flex items-center justify-center neon-glow-btn transition">
+                                {isPlaying ? <PauseIcon /> : <PlayIcon />}
+                            </button>
+                            <button onClick={siguienteCancion} className="text-cyan-400 hover:text-cyan-300 p-2 transition">
+                                <SkipForwardIcon />
+                            </button>
+                        </div>
+
+                        {/* Lista de Canciones en la Base de Datos */}
+                        <div className="mt-4 border-t border-neutral-800 pt-4">
+                            <h4 className="text-xs font-bold uppercase tracking-widest text-neutral-400 mb-2">Lista de reproducción ({canciones.length})</h4>
+                            <div className="max-h-36 overflow-y-auto custom-scrollbar space-y-1 pr-1">
+                                {canciones.map((can, index) => (
+                                    <div 
+                                        key={can.id} 
+                                        className={`flex justify-between items-center p-2 rounded text-xs cursor-pointer transition ${index === currentTrackIndex ? 'bg-cyan-500/10 text-cyan-300 border-l-2 border-cyan-400' : 'hover:bg-white/5 text-neutral-300'}`}
+                                        onClick={() => { setCurrentTrackIndex(index); setIsPlaying(true); }}
+                                    >
+                                        <div className="truncate flex-1 pr-2">
+                                            <span className="font-bold">{can.titulo}</span> - {can.artista}
+                                        </div>
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); eliminarCancion(can.id); }}
+                                            className="text-red-400 hover:text-red-500 p-1"
+                                        >
+                                            <TrashIcon />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            );
+        }
+
+        const container = document.getElementById('root');
+        const root = createRoot(container);
+        root.render(<App />);
+    </script>
+</body>
+</html>
