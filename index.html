@@ -3,174 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Psicosis Music - Neon Cyberpunk</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
+    <title>Descarga de Archivo</title>
     <style>
-        body { 
-            margin: 0; 
-            padding: 0; 
-            background-color: #03000a; 
-            overflow-x: hidden;
+        /* Estilos básicos para el botón de descarga */
+        .boton-descarga {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007BFF;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            transition: background-color 0.3s;
         }
-        .animate-spin-slow {
-            animation: spin 12s linear infinite;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .neon-glow-btn {
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
-            transition: all 0.3s ease;
-        }
-        .neon-glow-btn:hover {
-            box-shadow: 0 0 35px rgba(217, 70, 239, 0.8);
-            transform: scale(1.05);
-        }
-        .neon-text-cyan {
-            text-shadow: 0 0 8px rgba(6, 182, 212, 0.8), 0 0 20px rgba(6, 182, 212, 0.3);
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(3, 0, 10, 0.6);
-            border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: rgba(217, 70, 239, 0.2);
-            border-radius: 10px;
-            border: 1px solid rgba(6, 182, 212, 0.2);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(6, 182, 212, 0.6);
-            box-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 14px;
-            width: 14px;
-            border-radius: 50%;
-            background: #06b6d4;
-            cursor: pointer;
-            box-shadow: 0 0 10px #06b6d4;
+        .boton-descarga:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
-<body class="bg-[#03000a] text-neutral-200">
-    
-    <div id="root"></div>
+<body>
 
-    <script type="text/babel">
-        const { useState, useRef, useEffect } = React;
-        const { createRoot } = ReactDOM;
+    <a href="tu-archivo.zip" download="Nombre_Del_Archivo_Al_Descargar" class="boton-descarga">
+        Descargar Archivo
+    </a>
 
-        // --- CONFIGURACIÓN DE TU BASE DE DATOS FIREBASE ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyAznXQHLb2b_c0BDIPteN2TPmY8WBmf0fw",
-            authDomain: "psicosismusic-2b04a.firebaseapp.com",
-            databaseURL: "https://psicosismusic-2b04a-default-rtdb.firebaseio.com/",
-            projectId: "psicosismusic-2b04a",
-            storageBucket: "psicosismusic-2b04a.firebasestorage.app",
-            messagingSenderId: "233441166744",
-            appId: "1:233441166744:web:6757b5fb8d4fd1803697ed"
-        };
-
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const db = firebase.database();
-
-        // --- ICONOS ---
-        const PlayIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>;
-        const PauseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>;
-        const SkipForwardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>;
-        const SkipBackIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="5" x2="5" y2="19"/></svg>;
-        const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>;
-        const DownloadIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
-
-        function App() {
-            const [canciones, setCanciones] = useState([]);
-            const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-            const [isPlaying, setIsPlaying] = useState(false);
-            const [progress, setProgress] = useState(0);
-            const [duration, setDuration] = useState(0);
-            
-            const [panelAbierto, setPanelAbierto] = useState(false);
-            const [passwordInput, setPasswordInput] = useState("");
-            const [esAdmin, setEsAdmin] = useState(false);
-
-            const [inputUrlArchive, setInputUrlArchive] = useState("");
-            const [datosExtraidos, setDatosExtraidos] = useState(null);
-            const [estadoInyector, setEstadoInyector] = useState("");
-            const [descargandoMedia, setDescargandoMedia] = useState(false);
-
-            const [busqueda, setBusqueda] = useState("");
-
-            const audioRef = useRef(null);
-            const caratulaPorDefecto = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500";
-
-            useEffect(() => {
-                const cancionesRef = db.ref('canciones');
-                cancionesRef.on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        const lista = Object.keys(data).map(key => ({
-                            id: key,
-                            ...data[key]
-                        }));
-                        setCanciones(lista);
-                    } else {
-                        setCanciones([]);
-                    }
-                });
-                return () => cancionesRef.off();
-            }, []);
-
-            useEffect(() => {
-                if (audioRef.current) {
-                    if (isPlaying && canciones.length > 0) {
-                        audioRef.current.play().catch(() => setIsPlaying(false));
-                    } else {
-                        audioRef.current.pause();
-                    }
-                }
-            }, [isPlaying, currentTrackIndex, canciones]);
-
-            const trackActual = canciones[currentTrackIndex] || {
-                titulo: "Psicosis Music",
-                artista: "Inyecta un enlace para empezar",
-                mp3Url: "",
-                portada: caratulaPorDefecto
-            };
-
-            const actualizarProgreso = () => {
-                if (audioRef.current) setProgress(audioRef.current.currentTime);
-            };
-
-            const metadataCargada = () => {
-                if (audioRef.current) setDuration(audioRef.current.duration);
-            };
-
-            const cambiarProgreso = (e) => {
-                const nuevoTiempo = parseFloat(e.target.value);
-                if (audioRef.current) {
-                    audioRef.current.currentTime = nuevoTiempo;
-                    setProgress(nuevoTiempo);
-                }
-            };
-
-            const alternarReproduccion = () => {
-                if (canciones.length > 0) setIsPlaying(!isPlaying);
-            };
-
-            const siguienteCancion =
+</body>
+</html>
