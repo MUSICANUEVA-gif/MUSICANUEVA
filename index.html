@@ -197,7 +197,7 @@
                 }
             };
 
-            // --- FUNCIÓN DE DESCARGA CORREGIDA Y CORRECCIÓN DE FALLOS NATIVOS ---
+            // FUNCIÓN DE DESCARGA MEJORADA (EVITA EL ERROR DE CARGA DE PÁGINA)
             const descargarArchivoMp3 = async (e, urlAncla, nombreTrack) => {
                 e.preventDefault();
                 if (!urlAncla || descargandoMedia) return;
@@ -219,19 +219,11 @@
                     document.body.removeChild(enlaceDescarga);
                     window.URL.revokeObjectURL(urlBlob);
                 } catch (error) {
-                    // FALLBACK SEGURO: Si el servidor bloquea la descarga directa vía JavaScript por CORS,
-                    // abrimos el archivo en una pestaña limpia en segundo plano para forzar la descarga nativa
-                    // Evita de manera absoluta que la app principal reciba un impacto o muestre pantalla de error.
+                    // FALLBACK SEGURO: Si falla el fetch por CORS, abre el archivo en pestaña nueva para que no rompa la app
                     const ventanaSegura = window.open(urlAncla, '_blank');
                     if (!ventanaSegura) {
-                        // En caso extremo de bloqueo de popups por el navegador, descargamos de forma controlada por un link flotante temporal
-                        const linkAlternativo = document.createElement('a');
-                        linkAlternativo.href = urlAncla;
-                        linkAlternativo.setAttribute('download', `${nombreTrack}.mp3`);
-                        linkAlternativo.target = '_blank';
-                        document.body.appendChild(linkAlternativo);
-                        linkAlternativo.click();
-                        document.body.removeChild(linkAlternativo);
+                        // Si el móvil bloquea las pestañas emergentes, usamos un enlace tradicional limpio
+                        window.location.assign(urlAncla);
                     }
                 } finally {
                     setDescargandoMedia(false);
@@ -309,31 +301,31 @@
             });
 
             return (
-                <div 
-                    className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] min-h-screen w-full bg-cover bg-center bg-no-repeat bg-fixed"
-                    style={{ backgroundImage: "url('FONDO.jpg')" }}
-                >
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] min-h-screen w-full bg-[#03000a]">
                     
                     <audio 
                         ref={audioRef} src={trackActual.mp3Url} 
                         onTimeUpdate={actualizarProgreso} onLoadedMetadata={metadataCargada} onEnded={siguienteCancion}
                     />
 
-                    {/* LADO IZQUIERDO OPACADO (Solo escritorio) */}
-                    <div className="hidden lg:block h-full w-full bg-black/60 border-r border-cyan-500/10 backdrop-blur-sm"></div>
+                    {/* LADO IZQUIERDO: FONDO VERTICAL */}
+                    <div 
+                        className="hidden lg:block bg-cover bg-center h-full w-full border-r border-cyan-500/10"
+                        style={{ backgroundImage: "url('FONDO.jpg')" }}
+                    ></div>
 
-                    {/* CENTRO: REPRODUCTOR EFECTO CRISTAL NEÓN */}
-                    <div className="flex items-center justify-center p-4 min-w-[320px] sm:min-w-[450px] bg-black/40 lg:bg-transparent backdrop-blur-md lg:backdrop-blur-none relative">
+                    {/* CENTRO: REPRODUCTOR (ZONA LIMPIA) */}
+                    <div className="flex items-center justify-center p-4 min-w-[360px] sm:min-w-[450px] bg-[#03000a] relative">
                         
                         {/* REPRODUCTOR PRINCIPAL */}
-                        <div className="w-full max-w-md bg-[#0c061f]/90 border border-cyan-500/40 rounded-3xl p-6 backdrop-blur-2xl z-10 shadow-[0_0_50px_rgba(6,182,212,0.25)] relative">
+                        <div className="w-full max-w-md bg-[#0c061f]/95 border border-cyan-500/30 rounded-3xl p-6 backdrop-blur-xl z-10 shadow-[0_0_50px_rgba(6,182,212,0.15)] relative">
                             
                             {/* Cabecera */}
-                            <div className="flex justify-between items-center mb-4 gap-2">
-                                <h1 className="text-lg sm:text-xl font-black uppercase tracking-widest neon-text-cyan text-cyan-400 truncate">Psicosis Music</h1>
+                            <div className="flex justify-between items-center mb-4">
+                                <h1 className="text-xl font-black uppercase tracking-widest neon-text-cyan text-cyan-400">Psicosis Music</h1>
                                 <button 
                                     onClick={() => setPanelAbierto(!panelAbierto)}
-                                    className="px-3 py-1 text-[10px] sm:text-xs font-bold border border-fuchsia-500 text-fuchsia-400 rounded-full hover:bg-fuchsia-500/20 transition flex-shrink-0"
+                                    className="px-3 py-1 text-xs font-bold border border-fuchsia-500 text-fuchsia-400 rounded-full hover:bg-fuchsia-500/20 transition"
                                 >
                                     {panelAbierto ? "Ocultar Inyector" : "Modo Inyector"}
                                 </button>
@@ -352,7 +344,7 @@
 
                             {/* PANEL INYECTOR */}
                             {panelAbierto && (
-                                <div className="mb-6 p-4 bg-black/70 border border-fuchsia-500/40 rounded-2xl space-y-4">
+                                <div className="mb-6 p-4 bg-black/50 border border-fuchsia-500/40 rounded-2xl space-y-4">
                                     {!esAdmin ? (
                                         <form onSubmit={verificarPassword} className="space-y-2">
                                             <label className="text-xs font-bold text-fuchsia-400 uppercase tracking-wider block">Llave Secreta Admin:</label>
@@ -409,8 +401,8 @@
                             )}
 
                             {/* Disco de Carátula */}
-                            <div className="flex justify-center my-4 sm:my-6">
-                                <div className={`w-44 h-44 sm:w-56 sm:h-56 rounded-full border-4 border-cyan-400 p-1 shadow-[0_0_35px_rgba(6,182,212,0.3)] ${isPlaying ? 'animate-spin-slow' : ''}`}>
+                            <div className="flex justify-center my-6">
+                                <div className={`w-56 h-56 rounded-full border-4 border-cyan-400 p-1 shadow-[0_0_35px_rgba(6,182,212,0.3)] ${isPlaying ? 'animate-spin-slow' : ''}`}>
                                     <img 
                                         src={trackActual.portada || caratulaPorDefecto} alt="Carátula" 
                                         className="w-full h-full object-cover rounded-full select-none"
@@ -421,16 +413,16 @@
 
                             {/* Info Track */}
                             <div className="text-center mb-4">
-                                <h2 className="text-lg sm:text-xl font-bold tracking-wide text-white truncate px-2">{trackActual.titulo}</h2>
-                                <p className="text-xs sm:text-sm text-fuchsia-400 font-medium tracking-wide mt-0.5 truncate px-4">{trackActual.artista}</p>
+                                <h2 className="text-xl font-bold tracking-wide text-white truncate px-2">{trackActual.titulo}</h2>
+                                <p className="text-sm text-fuchsia-400 font-medium tracking-wide mt-0.5 truncate px-4">{trackActual.artista}</p>
                             </div>
 
                             {/* Descarga Forzada */}
                             {canciones.length > 0 && trackActual.mp3Url && (
-                                <div className="flex justify-center mb-4">
+                                <div className="flex justify-center mb-5">
                                     <button 
                                         onClick={(e) => descargarArchivoMp3(e, trackActual.mp3Url, trackActual.titulo)}
-                                        className="flex items-center gap-2 px-4 py-1.5 bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-700 rounded-full text-xs text-neutral-300 font-medium transition disabled:opacity-50"
+                                        className="flex items-center gap-2 px-4 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 rounded-full text-xs text-neutral-300 font-medium transition disabled:opacity-50"
                                         disabled={descargandoMedia}
                                     >
                                         <DownloadIcon />
@@ -440,7 +432,7 @@
                             )}
 
                             {/* Barra Progreso */}
-                            <div className="mb-4 sm:mb-6">
+                            <div className="mb-6">
                                 <input 
                                     type="range" min="0" max={duration || 0} value={progress} onChange={cambiarProgreso}
                                     className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer text-cyan-400"
@@ -452,12 +444,12 @@
                             </div>
 
                             {/* Controles */}
-                            <div className="flex justify-center items-center gap-6 mb-4 sm:mb-6">
-                                <button onClick={anteriorCancion} className="text-cyan-400 p-2 hover:text-cyan-300"><SkipBackIcon /></button>
-                                <button onClick={alternarReproduccion} className="w-12 h-12 sm:w-14 sm:h-14 bg-cyan-500 text-black rounded-full flex items-center justify-center neon-glow-btn flex-shrink-0">
+                            <div className="flex justify-center items-center gap-6 mb-6">
+                                <button onClick={anteriorCancion} className="text-cyan-400 p-2"><SkipBackIcon /></button>
+                                <button onClick={alternarReproduccion} className="w-14 h-14 bg-cyan-500 text-black rounded-full flex items-center justify-center neon-glow-btn">
                                     {isPlaying ? <PauseIcon /> : <PlayIcon />}
                                 </button>
-                                <button onClick={siguienteCancion} className="text-cyan-400 p-2 hover:text-cyan-300"><SkipForwardIcon /></button>
+                                <button onClick={siguienteCancion} className="text-cyan-400 p-2"><SkipForwardIcon /></button>
                             </div>
 
                             {/* Playlist */}
@@ -466,7 +458,7 @@
                                     <h4 className="text-xs font-bold uppercase tracking-widest text-neutral-400">Playlist en la Nube ({cancionesFiltradas.length})</h4>
                                 </div>
 
-                                <div className="max-h-36 sm:max-h-40 overflow-y-auto custom-scrollbar space-y-1">
+                                <div className="max-h-40 overflow-y-auto custom-scrollbar space-y-1">
                                     {cancionesFiltradas.length > 0 ? (
                                         cancionesFiltradas.map((can, index) => (
                                             <div 
@@ -507,20 +499,23 @@
                         </div>
 
                         {/* WATERMARK / LOGO FLOTANTE DE AUTOR */}
-                        <div className="absolute bottom-4 left-4 z-20 hidden sm:flex items-center gap-3 bg-[#0c061f]/90 border border-fuchsia-500/30 rounded-2xl p-2.5 backdrop-blur-md shadow-[0_0_20px_rgba(217,70,239,0.1)] transition-all hover:border-cyan-400/50">
+                        <div className="absolute bottom-4 left-4 z-20 hidden sm:flex items-center gap-3 bg-[#0c061f]/80 border border-fuchsia-500/30 rounded-2xl p-2.5 backdrop-blur-md shadow-[0_0_20px_rgba(217,70,239,0.1)] transition-all hover:border-cyan-400/50">
                             <div className="w-10 h-10 rounded-xl overflow-hidden border border-fuchsia-400/40 shadow-[0_0_10px_rgba(217,70,239,0.2)]">
                                 <img src="FONDO.jpg" alt="Creador" className="w-full h-full object-cover" />
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-[10px] font-black uppercase tracking-wider text-fuchsia-400">Desarrollado por</span>
-                                <span class="text-xs font-bold text-white tracking-wide">Psicosis Music Team</span>
+                                <span className="text-xs font-bold text-white tracking-wide">Psicosis Music Team</span>
                             </div>
                         </div>
 
                     </div>
 
-                    {/* LADO DERECHO OPACADO (Solo escritorio) */}
-                    <div className="hidden lg:block h-full w-full bg-black/60 border-l border-cyan-500/10 backdrop-blur-sm"></div>
+                    {/* LADO DERECHO: FONDO VERTICAL */}
+                    <div 
+                        className="hidden lg:block bg-cover bg-center h-full w-full border-l border-cyan-500/10"
+                        style={{ backgroundImage: "url('FONDO.jpg')" }}
+                    ></div>
 
                 </div>
             );
