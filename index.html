@@ -197,37 +197,25 @@
                 }
             };
 
-            // FUNCIÓN DE DESCARGA MEJORADA (EVITA EL ERROR DE CARGA DE PÁGINA)
-            const descargarArchivoMp3 = async (e, urlAncla, nombreTrack) => {
+            // FUNCIÓN DE DESCARGA SOLUCIONADA PARA TODOS LOS USUARIOS
+            const descargarArchivoMp3 = (e, urlAncla, nombreTrack) => {
                 e.preventDefault();
-                if (!urlAncla || descargandoMedia) return;
+                if (!urlAncla) return;
 
-                setDescargandoMedia(true);
-                try {
-                    const respuesta = await fetch(urlAncla);
-                    if (!respuesta.ok) throw new Error("CORS o error de red");
-                    
-                    const blob = await respuesta.blob();
-                    const urlBlob = window.URL.createObjectURL(blob);
-                    
-                    const enlaceDescarga = document.createElement('a');
-                    enlaceDescarga.href = urlBlob;
-                    enlaceDescarga.download = `${nombreTrack}.mp3`;
-                    document.body.appendChild(enlaceDescarga);
-                    enlaceDescarga.click();
-                    
-                    document.body.removeChild(enlaceDescarga);
-                    window.URL.revokeObjectURL(urlBlob);
-                } catch (error) {
-                    // FALLBACK SEGURO: Si falla el fetch por CORS, abre el archivo en pestaña nueva para que no rompa la app
-                    const ventanaSegura = window.open(urlAncla, '_blank');
-                    if (!ventanaSegura) {
-                        // Si el móvil bloquea las pestañas emergentes, usamos un enlace tradicional limpio
-                        window.location.assign(urlAncla);
-                    }
-                } finally {
-                    setDescargandoMedia(false);
-                }
+                // Crear un enlace temporal nativo de HTML
+                const enlaceDescarga = document.createElement('a');
+                enlaceDescarga.href = urlAncla;
+                
+                // Forzar descarga nativa y definir el nombre del archivo
+                enlaceDescarga.setAttribute('download', `${nombreTrack}.mp3`);
+                
+                // Asegurar que si hay problemas de CORS, se abra en una pestaña limpia de descarga externa
+                enlaceDescarga.setAttribute('target', '_blank');
+                enlaceDescarga.setAttribute('rel', 'noopener noreferrer');
+                
+                document.body.appendChild(enlaceDescarga);
+                enlaceDescarga.click();
+                document.body.removeChild(enlaceDescarga);
             };
 
             const procesarEnlaceArchive = async () => {
@@ -376,154 +364,3 @@
                                             </div>
 
                                             {estadoInyector && <p className="text-[11px] text-fuchsia-400 font-mono italic">{estadoInyector}</p>}
-
-                                            {datosExtraidos && (
-                                                <div className="p-2 bg-[#120a2b] border border-cyan-500/30 rounded space-y-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <img src={datosExtraidos.portada} className="w-10 h-10 rounded object-cover border border-cyan-500/30" />
-                                                        <div className="truncate flex-1">
-                                                            <p className="text-xs font-bold text-white truncate">{datosExtraidos.titulo}</p>
-                                                            <p className="text-[11px] text-gray-400 truncate">{datosExtraidos.artista}</p>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <button 
-                                                        onClick={aplicarYGuardarEnFirebase}
-                                                        className="w-full py-2 bg-gradient-to-r from-green-500 to-cyan-500 text-black font-black text-xs uppercase rounded shadow-lg hover:opacity-90 transition"
-                                                    >
-                                                        💾 GUARDAR CAMBIOS EN FIREBASE
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Disco de Carátula */}
-                            <div className="flex justify-center my-6">
-                                <div className={`w-56 h-56 rounded-full border-4 border-cyan-400 p-1 shadow-[0_0_35px_rgba(6,182,212,0.3)] ${isPlaying ? 'animate-spin-slow' : ''}`}>
-                                    <img 
-                                        src={trackActual.portada || caratulaPorDefecto} alt="Carátula" 
-                                        className="w-full h-full object-cover rounded-full select-none"
-                                        onError={(e) => { e.target.src = caratulaPorDefecto; }}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Info Track */}
-                            <div className="text-center mb-4">
-                                <h2 className="text-xl font-bold tracking-wide text-white truncate px-2">{trackActual.titulo}</h2>
-                                <p className="text-sm text-fuchsia-400 font-medium tracking-wide mt-0.5 truncate px-4">{trackActual.artista}</p>
-                            </div>
-
-                            {/* Descarga Forzada */}
-                            {canciones.length > 0 && trackActual.mp3Url && (
-                                <div className="flex justify-center mb-5">
-                                    <button 
-                                        onClick={(e) => descargarArchivoMp3(e, trackActual.mp3Url, trackActual.titulo)}
-                                        className="flex items-center gap-2 px-4 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 rounded-full text-xs text-neutral-300 font-medium transition disabled:opacity-50"
-                                        disabled={descargandoMedia}
-                                    >
-                                        <DownloadIcon />
-                                        <span>{descargandoMedia ? "Descargando..." : "Descargar MP3 Original"}</span>
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* Barra Progreso */}
-                            <div className="mb-6">
-                                <input 
-                                    type="range" min="0" max={duration || 0} value={progress} onChange={cambiarProgreso}
-                                    className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer text-cyan-400"
-                                />
-                                <div className="flex justify-between text-xs text-neutral-400 mt-2 font-mono">
-                                    <span>{Math.floor(progress/60)}:{( "0" + Math.floor(progress%60) ).slice(-2)}</span>
-                                    <span>{duration ? `${Math.floor(duration/60)}:${("0"+Math.floor(duration%60)).slice(-2)}` : "0:00"}</span>
-                                </div>
-                            </div>
-
-                            {/* Controles */}
-                            <div className="flex justify-center items-center gap-6 mb-6">
-                                <button onClick={anteriorCancion} className="text-cyan-400 p-2"><SkipBackIcon /></button>
-                                <button onClick={alternarReproduccion} className="w-14 h-14 bg-cyan-500 text-black rounded-full flex items-center justify-center neon-glow-btn">
-                                    {isPlaying ? <PauseIcon /> : <PlayIcon />}
-                                </button>
-                                <button onClick={siguienteCancion} className="text-cyan-400 p-2"><SkipForwardIcon /></button>
-                            </div>
-
-                            {/* Playlist */}
-                            <div className="mt-4 border-t border-neutral-800/60 pt-4">
-                                <div className="flex flex-col gap-2 mb-3">
-                                    <h4 className="text-xs font-bold uppercase tracking-widest text-neutral-400">Playlist en la Nube ({cancionesFiltradas.length})</h4>
-                                </div>
-
-                                <div className="max-h-40 overflow-y-auto custom-scrollbar space-y-1">
-                                    {cancionesFiltradas.length > 0 ? (
-                                        cancionesFiltradas.map((can, index) => (
-                                            <div 
-                                                key={can.id} 
-                                                className={`flex justify-between items-center p-2 rounded-xl text-xs cursor-pointer transition ${can.mp3Url === trackActual.mp3Url ? 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/30' : 'text-neutral-300 hover:bg-neutral-900/40'}`}
-                                                onClick={() => { 
-                                                    const originalIndex = canciones.findIndex(c => c.id === can.id);
-                                                    setCurrentTrackIndex(originalIndex); 
-                                                    setIsPlaying(true); 
-                                                }}
-                                            >
-                                                <div className="flex items-center gap-2.5 truncate flex-1">
-                                                    <img 
-                                                        src={can.portada || caratulaPorDefecto} 
-                                                        alt="Miniatura" 
-                                                        className="w-8 h-8 rounded-full object-cover border border-cyan-500/20 flex-shrink-0"
-                                                        onError={(e) => { e.target.src = caratulaPorDefecto; }}
-                                                    />
-                                                    <div className="truncate">
-                                                        <p className="font-bold truncate">{can.titulo}</p>
-                                                        <p className="text-[10px] text-neutral-400 truncate">{can.artista}</p>
-                                                    </div>
-                                                </div>
-
-                                                {esAdmin && (
-                                                    <button onClick={(e) => { e.stopPropagation(); eliminarCancion(can.id); }} className="text-red-400 p-1 hover:scale-110 transition ml-2 flex-shrink-0">
-                                                        <TrashIcon />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-[11px] text-center text-gray-500 italic py-2">No se encontraron resultados</p>
-                                    )}
-                                </div>
-                            </div>
-
-                        </div>
-
-                        {/* WATERMARK / LOGO FLOTANTE DE AUTOR */}
-                        <div className="absolute bottom-4 left-4 z-20 hidden sm:flex items-center gap-3 bg-[#0c061f]/80 border border-fuchsia-500/30 rounded-2xl p-2.5 backdrop-blur-md shadow-[0_0_20px_rgba(217,70,239,0.1)] transition-all hover:border-cyan-400/50">
-                            <div className="w-10 h-10 rounded-xl overflow-hidden border border-fuchsia-400/40 shadow-[0_0_10px_rgba(217,70,239,0.2)]">
-                                <img src="FONDO.jpg" alt="Creador" className="w-full h-full object-cover" />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-black uppercase tracking-wider text-fuchsia-400">Desarrollado por</span>
-                                <span className="text-xs font-bold text-white tracking-wide">Psicosis Music Team</span>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    {/* LADO DERECHO: FONDO VERTICAL */}
-                    <div 
-                        className="hidden lg:block bg-cover bg-center h-full w-full border-l border-cyan-500/10"
-                        style={{ backgroundImage: "url('FONDO.jpg')" }}
-                    ></div>
-
-                </div>
-            );
-        }
-
-        const container = document.getElementById('root');
-        const root = createRoot(container);
-        root.render(<App />);
-    </script>
-</body>
-</html>
