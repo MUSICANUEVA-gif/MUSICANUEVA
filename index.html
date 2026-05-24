@@ -3,115 +3,333 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Psicosis Music - Neon Cyberpunk</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
+    <title>Psicosis Music</title>
     <style>
-        body { 
-            margin: 0; 
-            padding: 0; 
-            background-color: #03000a; 
-            overflow-x: hidden;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .animate-spin-slow {
-            animation: spin 12s linear infinite;
+
+        body {
+            background: url('FONDO.jpg') no-repeat center center fixed;
+            background-size: cover;
+            background-color: #000;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
         }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+
+        /* Contenedor tipo máscara flotante sobre el fondo */
+        .player-container {
+            background: rgba(10, 10, 25, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            padding: 30px;
+            border-radius: 20px;
+            width: 380px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 20px rgba(0, 242, 254, 0.15);
         }
-        .neon-glow-btn {
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
-            transition: all 0.3s ease;
+
+        .search-box {
+            width: 100%;
+            padding: 10px 15px;
+            border-radius: 25px;
+            border: 1px solid #333;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            margin-bottom: 20px;
+            outline: none;
         }
-        .neon-glow-btn:hover {
-            box-shadow: 0 0 35px rgba(217, 70, 239, 0.8);
-            transform: scale(1.05);
+
+        .album-art-wrapper {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px auto;
         }
-        .neon-text-cyan {
-            text-shadow: 0 0 8px rgba(6, 182, 212, 0.8), 0 0 20px rgba(6, 182, 212, 0.3);
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(3, 0, 10, 0.6);
-            border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: rgba(217, 70, 239, 0.2);
-            border-radius: 10px;
-            border: 1px solid rgba(6, 182, 212, 0.2);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(6, 182, 212, 0.6);
-            box-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 14px;
-            width: 14px;
+
+        .album-art {
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            background: #06b6d4;
+            object-fit: cover;
+            border: 4px solid #00f2fe;
+            box-shadow: 0 0 15px #00f2fe;
+        }
+
+        .track-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .track-artist {
+            font-size: 0.9rem;
+            color: #00f2fe;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-download {
+            background: transparent;
+            border: 1px solid #00f2fe;
+            color: #00f2fe;
+            padding: 8px 20px;
+            border-radius: 20px;
             cursor: pointer;
-            box-shadow: 0 0 10px #06b6d4;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-download:hover {
+            background: #00f2fe;
+            color: #000;
+            box-shadow: 0 0 10px #00f2fe;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 70%;
+            height: 5px;
+            background: #333;
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #00f2fe;
+            border-radius: 5px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .control-btn:hover {
+            color: #00f2fe;
+        }
+
+        .play-btn {
+            font-size: 2.5rem;
+            color: #00f2fe;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.05);
         }
     </style>
 </head>
-<body class="bg-[#03000a] text-neutral-200">
-    
-    <script>
-        (function() {
-            var ua = navigator.userAgent || navigator.vendor || window.opera;
-            var isInApp = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || 
-                          (ua.indexOf("Instagram") > -1) || (ua.indexOf("TikTok") > -1) || 
-                          (ua.indexOf("Twitter") > -1) || (ua.indexOf("Line") > -1) || 
-                          (ua.indexOf("WhatsApp") > -1);
+<body>
 
-            if (isInApp) {
-                var currentUrl = window.location.href;
-                if (/Android/i.test(ua)) {
-                    var cleanUrl = currentUrl.replace(/https?:\/\//, "");
-                    window.location.href = "intent://" + cleanUrl + "#Intent;scheme=https;package=com.android.chrome;end";
-                } 
-                else if (/iPhone|iPad|iPod/i.test(ua)) {
-                    if (!currentUrl.includes("redirected=true")) {
-                        var separator = currentUrl.includes("?") ? "&" : "?";
-                        window.location.href = currentUrl + separator + "redirected=true";
-                    }
+    <div class="player-container">
+        <input type="text" id="linkInput" class="search-box" placeholder="Inyectar enlace de archive.org o canción..." onchange="cargarCancionDesdeEnlace(this.value)">
+
+        <div class="album-art-wrapper">
+            <img id="coverImg" src="https://via.placeholder.com/200?text=Psicosis+Music" class="album-art" alt="Portada">
+        </div>
+
+        <div id="trackTitle" class="track-title">Selecciona una pista</div>
+        <div id="trackArtist" class="track-artist">PSICOSIS</div>
+
+        <button class="btn-download" id="downloadBtn" onclick="descargarCancion()" disabled>
+            <span>⬇</span> Descargar MP3 Original
+        </button>
+
+        <div class="progress-container">
+            <span id="currentTime">0:00</span>
+            <div class="progress-bar" id="progressBar" onclick="setProgreso(event)">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <span id="totalDuration">0:00</span>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn">⏮</button>
+            <button class="control-btn play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+            <button class="control-btn">⏭</button>
+        </div>
+    </div>
+
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        const audio = document.getElementById('audioPlayer');
+        const playBtn = document.getElementById('playBtn');
+        const progressFill = document.getElementById('progressFill');
+        const progressBar = document.getElementById('progressBar');
+        const currentTimeTxt = document.getElementById('currentTime');
+        const totalDurationTxt = document.getElementById('totalDuration');
+        const trackTitle = document.getElementById('trackTitle');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const coverImg = document.getElementById('coverImg');
+
+        let urlCancionActual = "";
+
+        // FUNCIÓN PRINCIPAL: Procesa el enlace inyectado y asegura la reproducción directa
+        function cargarCancionDesdeEnlace(url) {
+            if (!url) return;
+            
+            let urlCorregida = url.trim();
+
+            // Corrección específica para Internet Archive (archive.org)
+            // Transforma páginas de detalles en enlaces directos al archivo de audio
+            if (urlCorregida.includes("archive.org/details/")) {
+                urlCorregida = urlCorregida.replace("archive.org/details/", "archive.org/download/");
+                // Si el enlace no termina en .mp3, intenta estructurarse de manera limpia
+                if (!urlCorregida.toLowerCase().endsWith(".mp3")) {
+                    // Mantiene la URL corregida base para que el reproductor intente resolver el stream
+                    console.log("Enlace de Archive optimizado para streaming.");
                 }
             }
-        })();
-    </script>
 
-    <div id="root"></div>
+            urlCancionActual = urlCorregida;
+            audio.src = urlCancionActual;
+            audio.load();
 
-    <script type="text/babel">
-        const { useState, useRef, useEffect } = React;
-        const { createRoot } = ReactDOM;
+            // Trata de extraer un título legible basado en el enlace inyectado
+            try {
+                const nombreArchivo = urlCorregida.substring(urlCorregida.lastIndexOf('/') + 1);
+                let tituloLimpio = decodeURIComponent(nombreArchivo).replace(/\.[^/.]+$/, "");
+                trackTitle.innerText = tituloLimpio || "Nueva Canción Inyectada";
+            } catch(e) {
+                trackTitle.innerText = "Nueva Canción Inyectada";
+            }
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAznXQHLb2b_c0BDIPteN2TPmY8WBmf0fw",
-            authDomain: "psicosismusic-2b04a.firebaseapp.com",
-            databaseURL: "https://psicosismusic-2b04a-default-rtdb.firebaseio.com/",
-            projectId: "psicosismusic-2b04a",
-            storageBucket: "psicosismusic-2b04a.firebasestorage.app",
-            messagingSenderId: "233441166744",
-            appId: "1:233441166744:web:6757b5fb8d4fd1803697ed"
-        };
+            // Habilitar botón de descarga
+            downloadBtn.disabled = false;
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
+            // Intentar buscar una portada automática (si archive tiene una estructura estándar, si no usa por defecto)
+            // Aquí puedes mapear tus portadas dinámicas de Firebase si cuentas con la lógica.
+            
+            // Reproducir automáticamente al inyectar
+            audio.play().then(() => {
+                playBtn.innerText = "⏸";
+            }).catch(err => {
+                console.log("Reproducción automática pausada por políticas del navegador, listo para dar Play.");
+                playBtn.innerText = "▶";
+            });
         }
-        const db = firebase.database();
 
-        const PlayIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>;
-        const PauseIcon = () => <svg xmlns="http://
+        // Control de Play / Pausa
+        function togglePlay() {
+            if (!audio.src) return;
+            if (audio.paused) {
+                audio.play();
+                playBtn.innerText = "⏸";
+            } else {
+                audio.pause();
+                playBtn.innerText = "▶";
+            }
+        }
+
+        // Actualización del progreso en pantalla
+        audio.addEventListener('timeupdate', () => {
+            if (!audio.duration) return;
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressFill.style.width = percent + '%';
+            
+            currentTimeTxt.innerText = formatTime(audio.currentTime);
+            totalDurationTxt.innerText = formatTime(audio.duration);
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            totalDurationTxt.innerText = formatTime(audio.duration);
+        });
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "0:00";
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return min + ":" + (sec < 10 ? "0" : "") + sec;
+        }
+
+        // Permitir adelantar o atrasar clicando la barra
+        function setProgreso(event) {
+            if (!audio.duration) return;
+            const width = progressBar.clientWidth;
+            const clickX = event.offsetX;
+            const duration = audio.duration;
+            audio.currentTime = (clickX / width) * duration;
+        }
+
+        // Descarga directa mediante conversión segura (Función Blob/Máscara)
+        function descargarCancion() {
+            if (!urlCancionActual) return;
+            
+            downloadBtn.innerText = "Descargando...";
+            downloadBtn.disabled = true;
+
+            fetch(urlCancionActual)
+                .then(response => {
+                    if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                    return response.blob();
+                })
+                .then(blob => {
+                    const urlBlob = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = urlBlob;
+                    
+                    // Asignar nombre al archivo descargado
+                    const nombreDescarga = trackTitle.innerText + ".mp3";
+                    a.download = nombreDescarga;
+                    
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    window.URL.revokeObjectURL(urlBlob);
+                    document.body.removeChild(a);
+                    
+                    downloadBtn.innerHTML = "<span>⬇</span> Descargar MP3 Original";
+                    downloadBtn.disabled = false;
+                })
+                .catch(err => {
+                    console.error(err);
+                    // Alternativa directa si el modo seguro falla por políticas externas
+                    const a = document.createElement('a');
+                    a.href = urlCancionActual;
+                    a.target = "_blank";
+                    a.download = trackTitle.innerText + ".mp3";
+                    a.click();
+                    
+                    downloadBtn.innerHTML = "<span>⬇</span> Descargar MP3 Original";
+                    downloadBtn.disabled = false;
+                });
+        }
+    </script>
+</body>
+</html>
