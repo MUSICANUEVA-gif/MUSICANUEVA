@@ -1,554 +1,407 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Psicosis Music - Neon Cyberpunk</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Psicosis Music FIX</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #03000a;
-            overflow-x: hidden;
-        }
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-        .animate-spin-slow {
-            animation: spin 12s linear infinite;
-        }
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-        .neon-glow-btn {
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
-            transition: all 0.3s ease;
-        }
+<style>
+body{
+background:#020617;
+color:white;
+margin:0;
+font-family:Arial;
+}
 
-        .neon-glow-btn:hover {
-            box-shadow: 0 0 35px rgba(217, 70, 239, 0.8);
-            transform: scale(1.05);
-        }
+.spin{
+animation:spin 12s linear infinite;
+}
 
-        .neon-text-cyan {
-            text-shadow: 0 0 8px rgba(6, 182, 212, 0.8),
-                         0 0 20px rgba(6, 182, 212, 0.3);
-        }
+@keyframes spin{
+from{transform:rotate(0deg)}
+to{transform:rotate(360deg)}
+}
+</style>
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(3, 0, 10, 0.6);
-            border-radius: 10px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: rgba(217, 70, 239, 0.2);
-            border-radius: 10px;
-            border: 1px solid rgba(6, 182, 212, 0.2);
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(6, 182, 212, 0.6);
-            box-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
-        }
-
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 14px;
-            width: 14px;
-            border-radius: 50%;
-            background: #06b6d4;
-            cursor: pointer;
-            box-shadow: 0 0 10px #06b6d4;
-        }
-    </style>
 </head>
 
-<body class="bg-[#03000a] text-neutral-200">
-
+<body>
 <div id="root"></div>
 
 <script type="text/babel">
 
-const { useState, useRef, useEffect } = React;
-const { createRoot } = ReactDOM;
+const {useState,useEffect,useRef}=React;
+const {createRoot}=ReactDOM;
 
-const firebaseConfig = {
-    apiKey: "AIzaSyAznXQHLb2b_c0BDIPteN2TPmY8WBmf0fw",
-    authDomain: "psicosismusic-2b04a.firebaseapp.com",
-    databaseURL: "https://psicosismusic-2b04a-default-rtdb.firebaseio.com/",
-    projectId: "psicosismusic-2b04a",
-    storageBucket: "psicosismusic-2b04a.firebasestorage.app",
-    messagingSenderId: "233441166744",
-    appId: "1:233441166744:web:6757b5fb8d4fd1803697ed"
+// FIREBASE
+const firebaseConfig={
+apiKey:"AIzaSyAznXQHLb2b_c0BDIPteN2TPmY8WBmf0fw",
+authDomain:"psicosismusic-2b04a.firebaseapp.com",
+databaseURL:"https://psicosismusic-2b04a-default-rtdb.firebaseio.com/",
+projectId:"psicosismusic-2b04a",
+storageBucket:"psicosismusic-2b04a.appspot.com",
+messagingSenderId:"233441166744",
+appId:"1:233441166744:web:6757b5fb8d4fd1803697ed"
 };
 
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+if(!firebase.apps.length){
+firebase.initializeApp(firebaseConfig);
 }
 
-const db = firebase.database();
+const db=firebase.database();
 
-const PlayIcon = () => (
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-<polygon points="5 3 19 12 5 21 5 3"/>
-</svg>
+function App(){
+
+const [url,setUrl]=useState("");
+const [estado,setEstado]=useState("");
+const [extraido,setExtraido]=useState(null);
+const [canciones,setCanciones]=useState([]);
+const [actual,setActual]=useState(0);
+const [play,setPlay]=useState(false);
+
+const audioRef=useRef(null);
+
+// CARGAR FIREBASE
+useEffect(()=>{
+
+const ref=db.ref("canciones");
+
+ref.on("value",snapshot=>{
+
+const data=snapshot.val();
+
+if(data){
+
+const lista=Object.keys(data).map(key=>({
+id:key,
+...data[key]
+}));
+
+setCanciones(lista);
+
+}else{
+setCanciones([]);
+}
+
+});
+
+return()=>ref.off();
+
+},[]);
+
+const track=canciones[actual]||{
+titulo:"Psicosis Music",
+artista:"Sin canción",
+portada:"https://archive.org/images/notfound.png",
+mp3Url:""
+};
+
+// PLAY
+useEffect(()=>{
+
+if(!audioRef.current)return;
+
+if(play){
+
+const intento=audioRef.current.play();
+
+if(intento!==undefined){
+
+intento
+.then(()=>{
+console.log("Reproduciendo");
+})
+.catch(err=>{
+console.log(err);
+alert("No se pudo reproducir el MP3");
+setPlay(false);
+});
+
+}
+
+}else{
+
+audioRef.current.pause();
+
+}
+
+},[play,actual]);
+
+// EXTRAER ARCHIVE
+async function extraer(){
+
+if(!url.trim()) return;
+
+try{
+
+setEstado("Analizando enlace...");
+setExtraido(null);
+
+let item="";
+
+if(url.includes("/details/")){
+item=url.split("/details/")[1].split("/")[0];
+}
+else if(url.includes("/download/")){
+item=url.split("/download/")[1].split("/")[0];
+}
+else if(url.includes("/items/")){
+item=url.split("/items/")[1].split("/")[0];
+}
+
+if(!item){
+alert("Link inválido");
+return;
+}
+
+// API REAL
+const api = await fetch(
+`https://archive.org/metadata/${item}`
 );
 
-const PauseIcon = () => (
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-<rect x="6" y="4" width="4" height="16"/>
-<rect x="14" y="4" width="4" height="16"/>
-</svg>
+const data = await api.json();
+
+if(!data.files){
+alert("No hay archivos");
+return;
+}
+
+// BUSCAR MP3 REAL
+const mp3 = data.files.find(file => {
+
+return (
+file.name &&
+file.name.toLowerCase().endsWith(".mp3")
 );
 
-function App() {
+});
 
-    const [canciones, setCanciones] = useState([]);
-    const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [progress, setProgress] = useState(0);
-    const [duration, setDuration] = useState(0);
+if(!mp3){
+alert("No existe MP3");
+return;
+}
 
-    const [panelAbierto, setPanelAbierto] = useState(false);
-    const [passwordInput, setPasswordInput] = useState("");
-    const [esAdmin, setEsAdmin] = useState(false);
+// URL REAL
+const realMp3 =
+`https://archive.org/download/${item}/${encodeURIComponent(mp3.name)}`;
 
-    const [inputUrlArchive, setInputUrlArchive] = useState("");
-    const [datosExtraidos, setDatosExtraidos] = useState(null);
-    const [estadoInyector, setEstadoInyector] = useState("");
+// PORTADA
+const portada =
+`https://archive.org/services/img/${item}`;
 
-    const audioRef = useRef(null);
+const nuevaCancion={
+mp3Url:realMp3,
+portada:portada,
+titulo:data.metadata?.title || mp3.name,
+artista:data.metadata?.creator || "Psicosis Music"
+};
 
-    const caratulaPorDefecto = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500";
+console.log(realMp3);
 
-    useEffect(() => {
+setExtraido(nuevaCancion);
 
-        const cancionesRef = db.ref('canciones');
+setEstado("MP3 detectado correctamente ✅");
 
-        cancionesRef.on('value', (snapshot) => {
+}catch(err){
 
-            const data = snapshot.val();
+console.log(err);
+setEstado("Error detectando MP3 ❌");
 
-            if (data) {
+}
 
-                const lista = Object.keys(data).map(key => ({
-                    id: key,
-                    ...data[key]
-                }));
+}
 
-                setCanciones(lista);
+// GUARDAR
+function guardar(){
 
-            } else {
+if(!extraido)return;
 
-                setCanciones([]);
+db.ref("canciones")
+.push(extraido)
+.then(()=>{
+alert("Guardado correctamente");
+setExtraido(null);
+setUrl("");
+setEstado("");
+})
+.catch(err=>{
+console.log(err);
+});
 
-            }
+}
 
-        });
+// DESCARGA
+function descargar(url,nombre){
 
-        return () => cancionesRef.off();
+if(!url)return;
 
-    }, []);
+const a=document.createElement("a");
 
-    useEffect(() => {
+a.href=url;
+a.download=`${nombre}.mp3`;
+a.target="_blank";
+a.rel="noopener noreferrer";
 
-        if (!audioRef.current) return;
+document.body.appendChild(a);
 
-        if (isPlaying) {
+a.click();
 
-            audioRef.current.play().catch(err => {
-                console.log(err);
-                setIsPlaying(false);
-            });
+document.body.removeChild(a);
 
-        } else {
+}
 
-            audioRef.current.pause();
+return(
+<div className="min-h-screen flex justify-center items-center p-5">
 
-        }
-
-    }, [isPlaying, currentTrackIndex]);
-
-    const trackActual = canciones[currentTrackIndex] || {
-        titulo: "Psicosis Music",
-        artista: "Inyecta un enlace",
-        portada: caratulaPorDefecto,
-        mp3Url: ""
-    };
-
-    const actualizarProgreso = () => {
-        if (audioRef.current) {
-            setProgress(audioRef.current.currentTime);
-        }
-    };
-
-    const metadataCargada = () => {
-        if (audioRef.current) {
-            setDuration(audioRef.current.duration);
-        }
-    };
-
-    const cambiarProgreso = (e) => {
-
-        const tiempo = parseFloat(e.target.value);
-
-        if (audioRef.current) {
-            audioRef.current.currentTime = tiempo;
-            setProgress(tiempo);
-        }
-    };
-
-    const alternarReproduccion = () => {
-
-        if (!trackActual.mp3Url) return;
-
-        setIsPlaying(!isPlaying);
-
-    };
-
-    const siguienteCancion = () => {
-
-        if (canciones.length === 0) return;
-
-        setCurrentTrackIndex(prev =>
-            (prev + 1) % canciones.length
-        );
-
-        setIsPlaying(true);
-    };
-
-    const verificarPassword = (e) => {
-
-        e.preventDefault();
-
-        if (passwordInput === "psicosis") {
-            setEsAdmin(true);
-            setPasswordInput("");
-        } else {
-            alert("Contraseña incorrecta");
-        }
-    };
-
-    const descargarArchivoMp3 = async (urlMp3, nombreTrack) => {
-
-        try {
-
-            const response = await fetch(urlMp3);
-
-            if (!response.ok) {
-                throw new Error("No se pudo descargar");
-            }
-
-            const blob = await response.blob();
-
-            const blobUrl = window.URL.createObjectURL(blob);
-
-            const a = document.createElement("a");
-
-            a.href = blobUrl;
-            a.download = `${nombreTrack}.mp3`;
-
-            document.body.appendChild(a);
-
-            a.click();
-
-            a.remove();
-
-            window.URL.revokeObjectURL(blobUrl);
-
-        } catch (err) {
-
-            console.error(err);
-            alert("Error descargando MP3");
-
-        }
-    };
-
-    const procesarEnlaceArchive = async () => {
-
-        if (!inputUrlArchive.trim()) return;
-
-        setEstadoInyector("Analizando enlace...");
-        setDatosExtraidos(null);
-
-        try {
-
-            let url = inputUrlArchive.trim();
-            let parteItem = "";
-
-            if (url.includes("/details/")) {
-                parteItem = url.split("/details/")[1].split("/")[0];
-            }
-            else if (url.includes("/download/")) {
-                parteItem = url.split("/download/")[1].split("/")[0];
-            }
-            else if (url.includes("/items/")) {
-                parteItem = url.split("/items/")[1].split("/")[0];
-            }
-
-            if (!parteItem) {
-                throw new Error("No se detectó item");
-            }
-
-            const apiRes = await fetch(`https://archive.org/metadata/${parteItem}`);
-            const apiData = await apiRes.json();
-
-            const archivoMp3 = apiData.files.find(file =>
-                file.name.toLowerCase().endsWith('.mp3')
-            );
-
-            if (!archivoMp3) {
-                throw new Error("No existe MP3");
-            }
-
-            const mp3Real = `https://archive.org/download/${parteItem}/${archivoMp3.name}`;
-
-            const portada = `https://archive.org/services/img/${parteItem}`;
-
-            const titulo =
-                apiData.metadata.title ||
-                archivoMp3.name.replace('.mp3', '');
-
-            const artista =
-                apiData.metadata.creator ||
-                'Psicosis Music';
-
-            setDatosExtraidos({
-                titulo,
-                artista,
-                portada,
-                mp3Url: mp3Real
-            });
-
-            setEstadoInyector("✅ MP3 detectado correctamente");
-
-        } catch (error) {
-
-            console.error(error);
-            setEstadoInyector("❌ Error obteniendo MP3");
-
-        }
-    };
-
-    const guardarFirebase = () => {
-
-        if (!datosExtraidos) return;
-
-        db.ref('canciones').push(datosExtraidos, (error) => {
-
-            if (error) {
-                alert("Error guardando");
-            } else {
-
-                alert("Canción guardada");
-
-                setInputUrlArchive("");
-                setDatosExtraidos(null);
-                setEstadoInyector("");
-
-            }
-
-        });
-    };
-
-    return (
-
-<div className="min-h-screen flex items-center justify-center bg-[#03000a] p-4">
-
-<div className="w-full max-w-md bg-[#0c061f]/95 border border-cyan-500/30 rounded-3xl p-6 backdrop-blur-xl shadow-[0_0_50px_rgba(6,182,212,0.15)]">
+<div className="w-full max-w-md bg-slate-900 rounded-3xl p-5 border border-cyan-500/20">
 
 <audio
-    ref={audioRef}
-    src={trackActual.mp3Url}
-    onTimeUpdate={actualizarProgreso}
-    onLoadedMetadata={metadataCargada}
-    onEnded={siguienteCancion}
-    onError={() => {
-        console.log("Error cargando audio");
-        setIsPlaying(false);
-    }}
+ref={audioRef}
+src={track.mp3Url}
+preload="auto"
+crossOrigin="anonymous"
+
+onCanPlay={()=>{
+console.log("Audio listo");
+}}
+
+onError={(e)=>{
+console.log("ERROR AUDIO",e);
+console.log(track.mp3Url);
+alert("No se pudo cargar el MP3");
+setPlay(false);
+}}
+
+onEnded={()=>{
+setPlay(false);
+}}
 />
 
-<h1 className="text-xl font-black uppercase tracking-widest neon-text-cyan text-cyan-400 text-center mb-4">
-    Psicosis Music
+<h1 className="text-3xl font-black text-center text-cyan-400 mb-5">
+PSICOSIS MUSIC
 </h1>
 
-<button
-    onClick={() => setPanelAbierto(!panelAbierto)}
-    className="w-full mb-4 py-2 bg-fuchsia-600 rounded-xl text-white font-bold"
->
-    {panelAbierto ? 'Cerrar Inyector' : 'Abrir Inyector'}
-</button>
-
-{panelAbierto && (
-
-<div className="space-y-3 mb-6">
-
-{!esAdmin ? (
-
-<form onSubmit={verificarPassword} className="space-y-2">
-
 <input
-    type="password"
-    placeholder="Contraseña"
-    value={passwordInput}
-    onChange={(e) => setPasswordInput(e.target.value)}
-    className="w-full p-3 rounded-xl bg-[#120a2b] border border-fuchsia-500/40 text-white"
-/>
-
-<button className="w-full bg-cyan-500 py-2 rounded-xl text-black font-bold">
-    Entrar
-</button>
-
-</form>
-
-) : (
-
-<div className="space-y-3">
-
-<input
-    type="url"
-    placeholder="Pega enlace de archive.org"
-    value={inputUrlArchive}
-    onChange={(e) => setInputUrlArchive(e.target.value)}
-    className="w-full p-3 rounded-xl bg-[#120a2b] border border-cyan-500/40 text-white"
+value={url}
+onChange={e=>setUrl(e.target.value)}
+placeholder="Pega link archive.org"
+className="w-full p-3 rounded-xl bg-black border border-cyan-500 text-white mb-3"
 />
 
 <button
-    onClick={procesarEnlaceArchive}
-    className="w-full bg-cyan-500 py-2 rounded-xl text-black font-bold"
+onClick={extraer}
+className="w-full bg-cyan-500 text-black font-bold p-3 rounded-xl mb-3"
 >
-    Extraer MP3
+EXTRAER MP3
 </button>
 
-{estadoInyector && (
-<p className="text-sm text-fuchsia-400">
-    {estadoInyector}
+{estado && (
+<p className="text-fuchsia-400 mb-3">
+{estado}
 </p>
 )}
 
-{datosExtraidos && (
-
-<div className="bg-[#120a2b] p-3 rounded-xl border border-cyan-500/30">
-
-<img
-    src={datosExtraidos.portada}
-    className="w-32 h-32 mx-auto rounded-xl object-cover mb-3"
-/>
-
-<h3 className="font-bold text-white text-center">
-    {datosExtraidos.titulo}
-</h3>
-
-<p className="text-center text-fuchsia-400 mb-4">
-    {datosExtraidos.artista}
-</p>
-
-<button
-    onClick={guardarFirebase}
-    className="w-full bg-green-500 py-2 rounded-xl text-black font-bold"
->
-    Guardar en Firebase
-</button>
-
-</div>
-
-)}
-
-</div>
-
-)}
-
-</div>
-
-<div className="flex justify-center my-6">
+{extraido && (
+<div className="bg-black/40 p-3 rounded-xl mb-5">
 
 <img
-    src={trackActual.portada || caratulaPorDefecto}
-    className={`w-56 h-56 rounded-full border-4 border-cyan-400 object-cover ${isPlaying ? 'animate-spin-slow' : ''}`}
+src={extraido.portada}
+className="w-40 h-40 rounded-xl object-cover mx-auto mb-3"
 />
 
-</div>
-
-<h2 className="text-center text-xl font-bold text-white mb-1">
-    {trackActual.titulo}
+<h2 className="text-center font-bold">
+{extraido.titulo}
 </h2>
 
-<p className="text-center text-fuchsia-400 mb-4">
-    {trackActual.artista}
+<p className="text-center text-fuchsia-400 mb-3">
+{extraido.artista}
 </p>
 
-<input
-    type="range"
-    min="0"
-    max={duration || 0}
-    value={progress}
-    onChange={cambiarProgreso}
-    className="w-full mb-4"
+<button
+onClick={guardar}
+className="w-full bg-green-500 text-black font-bold p-3 rounded-xl"
+>
+GUARDAR EN FIREBASE
+</button>
+
+</div>
+)}
+
+<div className="flex justify-center mb-5">
+
+<img
+src={track.portada}
+className={`w-56 h-56 rounded-full border-4 border-cyan-400 object-cover ${play ? "spin" : ""}`}
 />
 
-<div className="flex justify-center gap-4 mb-6">
+</div>
+
+<h2 className="text-center text-2xl font-bold">
+{track.titulo}
+</h2>
+
+<p className="text-center text-fuchsia-400 mb-5">
+{track.artista}
+</p>
+
+<div className="flex justify-center gap-3 mb-5">
 
 <button
-    onClick={alternarReproduccion}
-    className="w-14 h-14 bg-cyan-500 text-black rounded-full flex items-center justify-center"
+onClick={()=>setPlay(!play)}
+className="bg-cyan-500 text-black px-6 py-3 rounded-full font-bold"
 >
-    {isPlaying ? <PauseIcon /> : <PlayIcon />}
+{play ? "PAUSAR" : "PLAY"}
 </button>
 
 <button
-    onClick={() => descargarArchivoMp3(trackActual.mp3Url, trackActual.titulo)}
-    className="px-4 bg-fuchsia-600 rounded-full text-white font-bold"
+onClick={()=>descargar(track.mp3Url,track.titulo)}
+className="bg-fuchsia-600 px-6 py-3 rounded-full font-bold"
 >
-    Descargar
+DESCARGAR
 </button>
 
 </div>
 
-<div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+<div className="space-y-2 max-h-72 overflow-y-auto">
 
-{canciones.map((can, index) => (
-
+{canciones.map((can,index)=>(
 <div
-    key={can.id}
-    onClick={() => {
-        setCurrentTrackIndex(index);
-        setIsPlaying(true);
-    }}
-    className="flex items-center gap-3 p-2 rounded-xl hover:bg-[#120a2b] cursor-pointer"
+key={can.id}
+onClick={()=>{
+setActual(index);
+setPlay(true);
+}}
+className="flex items-center gap-3 p-2 rounded-xl bg-black/30 cursor-pointer hover:bg-cyan-500/10"
 >
 
 <img
-    src={can.portada}
-    className="w-12 h-12 rounded-full object-cover"
+src={can.portada}
+className="w-14 h-14 rounded-full object-cover"
 />
 
-<div className="truncate">
-    <p className="font-bold text-white truncate">{can.titulo}</p>
-    <p className="text-xs text-fuchsia-400 truncate">{can.artista}</p>
+<div>
+<p className="font-bold">
+{can.titulo}
+</p>
+<p className="text-sm text-fuchsia-400">
+{can.artista}
+</p>
 </div>
 
 </div>
-
 ))}
 
 </div>
@@ -556,17 +409,14 @@ function App() {
 </div>
 
 </div>
-
 );
 
 }
 
-const container = document.getElementById('root');
-const root = createRoot(container);
-root.render(<App />);
+const root=createRoot(document.getElementById("root"));
+root.render(<App/>);
 
 </script>
 
 </body>
 </html>
-```
