@@ -1,0 +1,5 @@
+database.sqlite
+audio/*
+uploads/covers/*
+!audio/.gitkeep
+!uploads/covers/.gitkeep
