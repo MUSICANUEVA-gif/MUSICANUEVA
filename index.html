@@ -3,11 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Psicosis Music PRO</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
+
 *{
 margin:0;
 padding:0;
@@ -16,304 +18,429 @@ font-family:'Poppins',sans-serif;
 }
 
 body{
-background:#060010;
-color:white;
-overflow-x:hidden;
-}
-
-body::before{
-content:'';
-position:fixed;
-inset:0;
 background:
-linear-gradient(rgba(0,0,0,.7),rgba(0,0,0,.8)),
-url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=1600');
+linear-gradient(rgba(5,0,15,.92),rgba(5,0,15,.96)),
+url('https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=1600');
 background-size:cover;
 background-position:center;
-z-index:-2;
+overflow:hidden;
+color:white;
 }
 
-body::after{
-content:'';
-position:fixed;
-inset:0;
-background:linear-gradient(90deg,#110022,#040012,#0d0222);
-opacity:.88;
-z-index:-1;
+/* APP */
+
+.app{
+display:flex;
+height:100vh;
+backdrop-filter:blur(20px);
 }
 
-.container{
-display:grid;
-grid-template-columns:250px 1fr 340px;
-gap:20px;
-padding:20px;
-min-height:100vh;
-}
+/* SIDEBAR */
 
 .sidebar{
-background:rgba(255,255,255,.05);
+width:300px;
+background:rgba(17,0,34,.88);
 backdrop-filter:blur(20px);
-border-radius:25px;
-padding:30px 20px;
-border:1px solid rgba(255,255,255,.08);
-}
-
-.logo{
-font-size:52px;
-font-weight:700;
-line-height:0.9;
-background:linear-gradient(180deg,#ff66ff,#8a2eff);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-margin-bottom:40px;
-}
-
-.menu button{
-width:100%;
-padding:16px;
-margin-bottom:15px;
-border:none;
-border-radius:18px;
-background:rgba(255,255,255,.05);
-color:white;
-font-size:18px;
-cursor:pointer;
-transition:.3s;
-}
-
-.menu button:hover{
-background:#8a2eff;
-transform:scale(1.02);
-}
-
-.main{
+padding:25px;
+border-right:1px solid rgba(255,255,255,.06);
 display:flex;
 flex-direction:column;
 gap:20px;
 }
 
-.hero{
-height:320px;
-border-radius:35px;
-overflow:hidden;
-position:relative;
-background:url('https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=1600');
-background-size:cover;
-background-position:center;
+.logo{
+font-size:64px;
+font-weight:800;
+line-height:0.9;
+background:linear-gradient(45deg,#ff57ff,#7d00ff);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
 }
 
-.hero::before{
+.menu{
+display:flex;
+flex-direction:column;
+gap:15px;
+margin-top:25px;
+}
+
+.menu button{
+border:none;
+padding:18px;
+border-radius:22px;
+background:rgba(255,255,255,.07);
+color:white;
+font-size:20px;
+cursor:pointer;
+transition:.35s;
+backdrop-filter:blur(10px);
+}
+
+.menu button:hover{
+background:#8f00ff;
+transform:translateX(5px);
+box-shadow:0 0 25px rgba(166,0,255,.5);
+}
+
+/* MAIN */
+
+.main{
+flex:1;
+padding:20px;
+overflow-y:auto;
+}
+
+/* BANNER */
+
+.banner{
+height:420px;
+border-radius:40px;
+padding:50px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+position:relative;
+overflow:hidden;
+
+background:
+linear-gradient(rgba(0,0,0,.45),rgba(0,0,0,.55)),
+url('/mnt/data/cbb8db9d-7a4d-4704-87ba-52c08f00517b.png');
+
+background-size:cover;
+background-position:center top;
+
+box-shadow:
+0 0 40px rgba(162,0,255,.45),
+0 0 120px rgba(111,0,255,.25);
+}
+
+.banner::before{
 content:'';
 position:absolute;
 inset:0;
-background:linear-gradient(to right,rgba(0,0,0,.8),rgba(0,0,0,.2));
+background:
+linear-gradient(
+90deg,
+rgba(140,0,255,.2),
+transparent,
+rgba(255,0,180,.1)
+);
+pointer-events:none;
 }
 
-.hero-content{
-position:absolute;
-left:40px;
-bottom:40px;
+.banner h1{
+font-size:82px;
+font-weight:800;
+position:relative;
 z-index:2;
 }
 
-.hero h1{
-font-size:72px;
-font-weight:700;
+.banner p{
+font-size:22px;
+color:#ddd;
+margin-top:10px;
+position:relative;
+z-index:2;
 }
 
 .search{
-margin-top:20px;
-width:350px;
-padding:15px 20px;
+margin-top:25px;
+width:450px;
+max-width:100%;
+padding:18px 25px;
 border:none;
 border-radius:30px;
-background:rgba(255,255,255,.15);
+background:rgba(255,255,255,.12);
 color:white;
-backdrop-filter:blur(20px);
+font-size:18px;
+outline:none;
+backdrop-filter:blur(12px);
+position:relative;
+z-index:2;
 }
 
-.grid{
+.search::placeholder{
+color:#ddd;
+}
+
+/* SONGS */
+
+.cards{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-gap:20px;
+grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+gap:25px;
+margin-top:30px;
 }
 
 .card{
-background:rgba(255,255,255,.05);
-border-radius:25px;
+background:rgba(255,255,255,.06);
+border-radius:30px;
 overflow:hidden;
-backdrop-filter:blur(20px);
-transition:.3s;
 cursor:pointer;
+transition:.35s;
+border:1px solid rgba(255,255,255,.08);
+backdrop-filter:blur(18px);
 }
 
 .card:hover{
-transform:translateY(-5px) scale(1.02);
-box-shadow:0 0 25px #8a2eff;
+transform:translateY(-10px) scale(1.03);
+
+box-shadow:
+0 0 30px rgba(174,0,255,.45),
+0 0 80px rgba(90,0,255,.35);
 }
 
 .card img{
 width:100%;
-height:220px;
+height:280px;
 object-fit:cover;
+transition:.4s;
+}
+
+.card:hover img{
+transform:scale(1.05);
 }
 
 .card-info{
-padding:15px;
+padding:18px;
 }
 
-.card h3{
-font-size:24px;
+.card-info h3{
+font-size:36px;
+font-weight:700;
 }
 
-.card p{
-opacity:.8;
-margin-top:5px;
+.card-info p{
+margin-top:8px;
+color:#bbb;
+font-size:18px;
 }
+
+/* PLAYER */
 
 .player{
-background:rgba(255,255,255,.05);
-backdrop-filter:blur(20px);
-border-radius:30px;
+width:380px;
+background:
+linear-gradient(
+180deg,
+rgba(9,31,63,.96),
+rgba(18,0,38,.96)
+);
+
 padding:25px;
 display:flex;
 flex-direction:column;
 align-items:center;
-border:1px solid rgba(255,255,255,.08);
+gap:20px;
+border-left:1px solid rgba(255,255,255,.06);
+position:relative;
+
+box-shadow:
+0 0 30px rgba(140,0,255,.25);
 }
 
-.player img{
-width:220px;
-height:220px;
+.admin-btn{
+position:absolute;
+top:15px;
+right:15px;
+border:none;
+background:#8f00ff;
+color:white;
+padding:12px 20px;
+border-radius:20px;
+font-weight:700;
+cursor:pointer;
+}
+
+.player-cover{
+width:240px;
+height:240px;
 object-fit:cover;
-border-radius:25px;
-box-shadow:0 0 30px #8a2eff;
+border-radius:30px;
+
+margin-top:50px;
+
+box-shadow:
+0 0 25px #8f00ff,
+0 0 70px rgba(170,0,255,.5);
 }
 
 .player h2{
-margin-top:20px;
-font-size:48px;
+font-size:58px;
+font-weight:800;
+text-align:center;
 }
 
 .player p{
-opacity:.8;
-margin-bottom:20px;
+font-size:22px;
+color:#ccc;
 }
 
-.playBtn{
-width:100px;
-height:100px;
+.play-btn{
+width:130px;
+height:130px;
+border:none;
 border-radius:50%;
-border:none;
-background:linear-gradient(180deg,#c83cff,#7a00ff);
-color:white;
-font-size:40px;
+font-size:60px;
 cursor:pointer;
-box-shadow:0 0 30px #a200ff;
-margin:20px 0;
+color:white;
+
+background:
+linear-gradient(45deg,#7a00ff,#ff2dff);
+
+box-shadow:
+0 0 20px #b300ff,
+0 0 60px #8f00ff;
+
+transition:.3s;
 }
 
-.download{
-padding:16px 30px;
-border:none;
-border-radius:18px;
-background:linear-gradient(90deg,#9d00ff,#ff2fd1);
-color:white;
-font-size:20px;
-cursor:pointer;
-margin-top:20px;
+.play-btn:hover{
+transform:scale(1.08);
 }
 
 audio{
 width:100%;
-margin-top:20px;
+margin-top:10px;
 }
 
-.injector{
+.download-btn,
+.delete-btn{
+width:100%;
+padding:18px;
+border:none;
+border-radius:20px;
+font-size:24px;
+font-weight:700;
+cursor:pointer;
+transition:.3s;
+color:white;
+}
+
+.download-btn{
+background:linear-gradient(45deg,#6a00ff,#ff3dff);
+}
+
+.download-btn:hover{
+transform:scale(1.03);
+}
+
+.delete-btn{
+background:#ff1744;
+display:none;
+}
+
+.delete-btn:hover{
+transform:scale(1.03);
+}
+
+/* LOGIN */
+
+.login{
 position:fixed;
 inset:0;
 background:rgba(0,0,0,.8);
 display:none;
-justify-content:center;
 align-items:center;
-z-index:999;
+justify-content:center;
+z-index:1000;
 }
 
-.injector-box{
-width:450px;
-background:#12001f;
-padding:30px;
+.login-box{
+width:420px;
+background:#160022;
+padding:35px;
 border-radius:30px;
-box-shadow:0 0 30px #8a2eff;
+
+display:flex;
+flex-direction:column;
+gap:20px;
+
+box-shadow:
+0 0 30px rgba(170,0,255,.35);
 }
 
-.injector-box h2{
-margin-bottom:20px;
+.login-box h2{
 text-align:center;
+font-size:42px;
 }
 
-.injector-box input{
-width:100%;
-padding:16px;
-margin-bottom:15px;
+.login-box input{
+padding:18px;
 border:none;
-border-radius:15px;
-background:#1f0a35;
-color:white;
-}
-
-.injector-box button{
-width:100%;
-padding:16px;
-border:none;
-border-radius:15px;
-background:#8a2eff;
+border-radius:18px;
+background:#26003a;
 color:white;
 font-size:18px;
-cursor:pointer;
+outline:none;
 }
 
-.adminBtn{
-position:fixed;
-top:15px;
-right:15px;
-padding:10px 20px;
+.login-box button{
+padding:18px;
 border:none;
-border-radius:20px;
-background:#8a2eff;
+border-radius:18px;
+background:#8f00ff;
 color:white;
+font-size:20px;
+font-weight:700;
 cursor:pointer;
-z-index:99;
 }
 
-@media(max-width:1000px){
-.container{
-grid-template-columns:1fr;
+/* MOBILE */
+
+@media(max-width:950px){
+
+body{
+overflow:auto;
+}
+
+.app{
+flex-direction:column;
+height:auto;
 }
 
 .sidebar{
+width:100%;
+flex-direction:row;
+overflow-x:auto;
+}
+
+.logo{
 display:none;
 }
 
-.hero h1{
+.player{
+width:100%;
+}
+
+.banner{
+height:300px;
+}
+
+.banner h1{
 font-size:48px;
 }
 
-.player{
-margin-bottom:50px;
+.player h2{
+font-size:42px;
 }
+
 }
+
 </style>
 </head>
 
 <body>
 
-<button class="adminBtn" onclick="openInjector()">ADMIN</button>
+<div class="app">
 
-<div class="container">
+<!-- SIDEBAR -->
 
 <div class="sidebar">
-<div class="logo">PSICOSIS<br>MUSIC</div>
+
+<div class="logo">
+PSICOSIS<br>MUSIC
+</div>
 
 <div class="menu">
 <button>🏠 Inicio</button>
@@ -322,163 +449,300 @@ margin-bottom:50px;
 <button>❤️ Favoritos</button>
 <button>⬇ Descargas</button>
 </div>
+
 </div>
+
+<!-- MAIN -->
 
 <div class="main">
 
-<div class="hero">
-<div class="hero-content">
+<div class="banner">
+
 <h1>Psicosis Music</h1>
+
+<p>
+DJ • Productor • Music Platform
+</p>
+
 <input class="search" placeholder="Buscar canción o artista">
-</div>
-</div>
-
-<div class="grid" id="playlist"></div>
 
 </div>
+
+<div class="cards" id="songs"></div>
+
+</div>
+
+<!-- PLAYER -->
 
 <div class="player">
-<img id="cover" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=1200">
-<h2 id="title">Selecciona</h2>
-<p id="artist">Psicosis Music</p>
 
-<button class="playBtn" onclick="togglePlay()">▶</button>
+<button class="admin-btn" onclick="openLogin()">
+ADMIN
+</button>
+
+<img id="playerCover" class="player-cover">
+
+<h2 id="playerTitle">
+Selecciona
+</h2>
+
+<p id="playerArtist">
+Psicosis Music
+</p>
+
+<button class="play-btn" onclick="togglePlay()">
+▶
+</button>
 
 <audio id="audio" controls></audio>
 
-<button class="download" onclick="downloadSong()">⬇ Descargar MP3</button>
+<button class="download-btn" id="downloadBtn">
+⬇ Descargar MP3
+</button>
+
+<button class="delete-btn" id="deleteBtn">
+Eliminar
+</button>
+
+</div>
+
+</div>
+
+<!-- LOGIN -->
+
+<div class="login" id="login">
+
+<div class="login-box">
+
+<h2>ADMIN</h2>
+
+<input id="user" placeholder="Usuario">
+
+<input id="pass" type="password" placeholder="Contraseña">
+
+<button onclick="login()">
+Entrar
+</button>
+
 </div>
 
 </div>
 
-<div class="injector" id="injector">
-<div class="injector-box">
+<script type="module">
 
-<h2>INYECTOR PSICOSIS</h2>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-<input type="text" id="songTitle" placeholder="Título">
-<input type="text" id="songArtist" placeholder="Artista">
-<input type="text" id="songUrl" placeholder="URL MP3">
-<input type="text" id="coverUrl" placeholder="URL Carátula">
-
-<button onclick="injectSong()">INYECTAR</button>
-
-</div>
-</div>
-
-<script>
-
-let currentSong='';
-
-function openInjector(){
-const pass=prompt("Contraseña admin");
-if(pass==="admin123"){
-document.getElementById("injector").style.display="flex";
-}else{
-alert("Acceso denegado");
+import {
+getDatabase,
+ref,
+push,
+set,
+onValue,
+remove
 }
-}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-function injectSong(){
+/* FIREBASE */
 
-const title=document.getElementById("songTitle").value;
-const artist=document.getElementById("songArtist").value;
-const url=document.getElementById("songUrl").value;
-const cover=document.getElementById("coverUrl").value;
+const firebaseConfig = {
 
-if(!title||!artist||!url||!cover){
-alert("Completa todos los campos");
-return;
-}
+apiKey: "AIzaSyAznXQHLb2b_c0BDIPteN2TPmY8WBmf0fw",
+authDomain: "psicosismusic-2b04a.firebaseapp.com",
+databaseURL: "https://psicosismusic-2b04a-default-rtdb.firebaseio.com",
+projectId: "psicosismusic-2b04a",
+storageBucket: "psicosismusic-2b04a.appspot.com",
+messagingSenderId: "233441166744",
+appId: "1:233441166744:web:6757b5fb8d4fd1803697ed"
 
-const song={
-title,
-artist,
-url,
-cover
 };
 
-let songs=JSON.parse(localStorage.getItem("psicosisSongs"))||[];
-songs.unshift(song);
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
 
-localStorage.setItem("psicosisSongs",JSON.stringify(songs));
+/* ELEMENTOS */
 
-renderSongs();
+const songsDiv = document.getElementById("songs");
 
-document.getElementById("injector").style.display="none";
+const playerCover = document.getElementById("playerCover");
+const playerTitle = document.getElementById("playerTitle");
+const playerArtist = document.getElementById("playerArtist");
 
-alert("Canción agregada");
+const audio = document.getElementById("audio");
+
+const downloadBtn = document.getElementById("downloadBtn");
+const deleteBtn = document.getElementById("deleteBtn");
+
+let songs = [];
+let currentSong = null;
+let adminMode = false;
+
+/* LOGIN */
+
+window.openLogin = ()=>{
+
+document.getElementById("login").style.display = "flex";
+
+};
+
+window.login = ()=>{
+
+const user = document.getElementById("user").value;
+const pass = document.getElementById("pass").value;
+
+if(user === "admin" && pass === "admin123"){
+
+adminMode = true;
+
+document.getElementById("login").style.display = "none";
+
+deleteBtn.style.display = "block";
+
+alert("ADMIN ACTIVADO");
+
+}else{
+
+alert("DATOS INCORRECTOS");
+
 }
+
+};
+
+/* RENDER */
 
 function renderSongs(){
 
-const playlist=document.getElementById("playlist");
+songsDiv.innerHTML = "";
 
-playlist.innerHTML='';
+songs.forEach(song=>{
 
-let songs=JSON.parse(localStorage.getItem("psicosisSongs"))||[];
+const card = document.createElement("div");
 
-songs.forEach((song,index)=>{
+card.className = "card";
 
-playlist.innerHTML+=`
-<div class="card" onclick="playSong(${index})">
+card.innerHTML = `
 <img src="${song.cover}">
 <div class="card-info">
 <h3>${song.title}</h3>
 <p>${song.artist}</p>
 </div>
-</div>
 `;
+
+card.onclick = ()=>selectSong(song);
+
+songsDiv.appendChild(card);
 
 });
 
 }
 
-function playSong(index){
+/* SELECT SONG */
 
-let songs=JSON.parse(localStorage.getItem("psicosisSongs"))||[];
+function selectSong(song){
 
-const song=songs[index];
+currentSong = song;
 
-document.getElementById("cover").src=song.cover;
-document.getElementById("title").innerText=song.title;
-document.getElementById("artist").innerText=song.artist;
+playerCover.src = song.cover;
+playerTitle.innerText = song.title;
+playerArtist.innerText = song.artist;
 
-const audio=document.getElementById("audio");
+audio.src = song.url;
 
-audio.src=song.url;
+downloadBtn.onclick = ()=>{
 
-audio.play();
+const a = document.createElement("a");
 
-currentSong=song.url;
+a.href = song.url;
+a.download = song.title + ".mp3";
+
+document.body.appendChild(a);
+
+a.click();
+
+document.body.removeChild(a);
+
+};
+
+deleteBtn.onclick = ()=>eliminarCancion(song.id);
+
 }
 
-function togglePlay(){
-const audio=document.getElementById("audio");
+/* PLAY */
+
+window.togglePlay = ()=>{
 
 if(audio.paused){
+
 audio.play();
+
 }else{
+
 audio.pause();
-}
+
 }
 
-function downloadSong(){
+};
 
-if(!currentSong){
-alert("Selecciona una canción");
+/* ELIMINAR */
+
+async function eliminarCancion(id){
+
+if(!adminMode){
+
+alert("SOLO ADMIN");
+
 return;
+
 }
 
-const a=document.createElement("a");
-a.href=currentSong;
-a.download="PsicosisMusic.mp3";
-document.body.appendChild(a);
-a.click();
-document.body.removeChild(a);
-}
+const confirmar = confirm("Eliminar canción?");
+
+if(!confirmar) return;
+
+try{
+
+await remove(ref(database,"songs/" + id));
+
+songs = songs.filter(s=>s.id !== id);
 
 renderSongs();
+
+audio.pause();
+audio.src = "";
+
+playerCover.src = "";
+playerTitle.innerText = "Selecciona";
+playerArtist.innerText = "Psicosis Music";
+
+alert("Canción eliminada");
+
+}catch(error){
+
+console.log(error);
+
+alert("Error eliminando");
+
+}
+
+}
+
+/* FIREBASE SONGS */
+
+onValue(ref(database,"songs"), snapshot=>{
+
+songs = [];
+
+snapshot.forEach(child=>{
+
+songs.push({
+id: child.key,
+...child.val()
+});
+
+});
+
+renderSongs();
+
+});
 
 </script>
 
