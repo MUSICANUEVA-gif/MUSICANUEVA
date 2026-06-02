@@ -1,0 +1,546 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Psicosis Music</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:#07070d;
+color:white;
+overflow-x:hidden;
+min-height:100vh;
+}
+
+.bg{
+position:fixed;
+inset:0;
+background:
+radial-gradient(circle at top left,#7a00ff55,transparent 35%),
+radial-gradient(circle at bottom right,#00d9ff55,transparent 35%),
+linear-gradient(to bottom,#050510,#090015);
+z-index:-2;
+}
+
+.glow{
+position:fixed;
+width:700px;
+height:700px;
+background:#8a2cff33;
+filter:blur(140px);
+border-radius:50%;
+top:-200px;
+left:-200px;
+z-index:-1;
+animation:move 12s infinite alternate ease-in-out;
+}
+
+@keyframes move{
+from{transform:translate(0,0);}
+to{transform:translate(120px,80px);}
+}
+
+.desktop{
+display:flex;
+gap:25px;
+padding:25px;
+min-height:100vh;
+}
+
+.sidebar{
+width:250px;
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.08);
+backdrop-filter:blur(20px);
+border-radius:30px;
+padding:25px;
+display:flex;
+flex-direction:column;
+}
+
+.logo{
+font-size:2rem;
+font-weight:700;
+margin-bottom:30px;
+color:#fff;
+cursor:pointer;
+}
+
+.logo span{
+color:#b14dff;
+}
+
+.menu{
+display:flex;
+flex-direction:column;
+gap:15px;
+}
+
+.menu div{
+padding:14px;
+border-radius:15px;
+background:rgba(255,255,255,.04);
+}
+
+.main{
+flex:1;
+display:flex;
+flex-direction:column;
+gap:25px;
+}
+
+.hero{
+height:300px;
+border-radius:35px;
+background:
+linear-gradient(to right,#000000aa,#00000044),
+url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=1200&auto=format&fit=crop');
+background-size:cover;
+background-position:center;
+display:flex;
+align-items:end;
+padding:35px;
+position:relative;
+overflow:hidden;
+}
+
+.hero::after{
+content:'';
+position:absolute;
+inset:0;
+background:linear-gradient(to top,#000000cc,transparent);
+}
+
+.hero-content{
+position:relative;
+z-index:2;
+}
+
+.hero h1{
+font-size:4rem;
+font-weight:700;
+}
+
+.search{
+margin-top:20px;
+width:350px;
+max-width:100%;
+padding:14px 20px;
+border:none;
+border-radius:20px;
+background:rgba(255,255,255,.1);
+color:white;
+outline:none;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+gap:20px;
+}
+
+.card{
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.08);
+border-radius:25px;
+overflow:hidden;
+backdrop-filter:blur(12px);
+}
+
+.card img{
+width:100%;
+height:180px;
+object-fit:cover;
+}
+
+.card-info{
+padding:15px;
+}
+
+.player{
+width:330px;
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.08);
+backdrop-filter:blur(20px);
+border-radius:35px;
+padding:25px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+}
+
+.player-cover{
+width:240px;
+height:240px;
+border-radius:30px;
+overflow:hidden;
+margin-bottom:25px;
+box-shadow:0 0 35px #8a2cff66;
+}
+
+.player-cover img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+.controls{
+display:flex;
+align-items:center;
+gap:25px;
+margin-top:20px;
+}
+
+.play{
+width:80px;
+height:80px;
+border-radius:50%;
+border:none;
+font-size:2rem;
+background:#8a2cff;
+color:white;
+}
+
+.download{
+display:block;
+margin-top:25px;
+padding:15px;
+text-align:center;
+background:#8a2cff;
+border-radius:20px;
+color:white;
+text-decoration:none;
+font-weight:600;
+width:100%;
+}
+
+.mobile{
+display:none;
+padding:20px;
+}
+
+.phone{
+background:rgba(255,255,255,.05);
+border-radius:40px;
+padding:20px;
+backdrop-filter:blur(18px);
+border:1px solid rgba(255,255,255,.08);
+}
+
+.phone-cover{
+width:100%;
+height:320px;
+border-radius:25px;
+overflow:hidden;
+margin-bottom:20px;
+}
+
+.phone-cover img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+/* ADMIN */
+
+#adminPanel{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+width:90%;
+max-width:420px;
+background:#0a0615;
+border:1px solid #8a2cff66;
+border-radius:30px;
+padding:25px;
+display:none;
+z-index:9999;
+backdrop-filter:blur(20px);
+box-shadow:0 0 50px #8a2cff55;
+}
+
+#adminPanel h2{
+margin-bottom:20px;
+text-align:center;
+}
+
+#adminPanel input{
+width:100%;
+padding:14px;
+margin-bottom:14px;
+border:none;
+border-radius:14px;
+background:#171125;
+color:white;
+outline:none;
+}
+
+#adminPanel button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:14px;
+background:#8a2cff;
+color:white;
+font-weight:700;
+cursor:pointer;
+margin-top:10px;
+}
+
+.hidden{
+display:none;
+}
+
+@media(max-width:1100px){
+
+.desktop{
+display:none;
+}
+
+.mobile{
+display:block;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="bg"></div>
+<div class="glow"></div>
+
+<div class="desktop">
+
+<div class="sidebar">
+
+<div class="logo" id="logo">
+PSICOSIS <span>MUSIC</span>
+</div>
+
+<div class="menu">
+<div>🏠 Inicio</div>
+<div>🔥 Tendencias</div>
+<div>🎵 Playlist</div>
+<div>❤️ Favoritos</div>
+<div>⬇ Descargas</div>
+</div>
+
+</div>
+
+<div class="main">
+
+<div class="hero">
+
+<div class="hero-content">
+
+<h1>Psicosis Music</h1>
+
+<input class="search" placeholder="Buscar canción o artista">
+
+</div>
+
+</div>
+
+<div class="grid">
+
+<div class="card">
+<img src="https://picsum.photos/300?1">
+<div class="card-info">
+<h3>Rebound</h3>
+<p>NightmareOwl</p>
+</div>
+</div>
+
+<div class="card">
+<img src="https://picsum.photos/300?2">
+<div class="card-info">
+<h3>Cyberwave</h3>
+<p>Synth Lab</p>
+</div>
+</div>
+
+<div class="card">
+<img src="https://picsum.photos/300?3">
+<div class="card-info">
+<h3>Dreamscape</h3>
+<p>Nova</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="player">
+
+<div class="player-cover">
+<img src="https://picsum.photos/500">
+</div>
+
+<h2>Rebound</h2>
+
+<p>NightmareOwl</p>
+
+<div class="controls">
+<div>⏮</div>
+<button class="play">▶</button>
+<div>⏭</div>
+</div>
+
+<a class="download" href="#">
+⬇ Descargar MP3
+</a>
+
+</div>
+
+</div>
+
+<div class="mobile">
+
+<div class="phone">
+
+<div class="phone-cover">
+<img src="https://picsum.photos/600">
+</div>
+
+<h1>Psicosis Music</h1>
+
+<p>Cyberpunk Streaming</p>
+
+<a class="download" href="#">
+⬇ Descargar
+</a>
+
+</div>
+
+</div>
+
+<!-- ADMIN -->
+
+<div id="adminPanel">
+
+<h2>INYECTOR PSICOSIS</h2>
+
+<div id="loginBox">
+
+<input type="text" id="user" placeholder="Usuario">
+<input type="password" id="pass" placeholder="Contraseña">
+
+<button onclick="login()">
+Entrar
+</button>
+
+</div>
+
+<div id="injectorBox" class="hidden">
+
+<input type="text" id="mp3Url" placeholder="URL MP3 archive.org">
+
+<input type="text" id="coverUrl" placeholder="URL portada archive.org">
+
+<button onclick="injectSong()">
+INYECTAR
+</button>
+
+</div>
+
+<button onclick="closePanel()">
+Cerrar
+</button>
+
+</div>
+
+<script>
+
+let clicks = 0;
+
+document.getElementById("logo").addEventListener("click",()=>{
+
+clicks++;
+
+if(clicks >= 3){
+
+document.getElementById("adminPanel").style.display = "block";
+
+clicks = 0;
+
+}
+
+setTimeout(()=>{
+
+clicks = 0;
+
+},1500);
+
+});
+
+function closePanel(){
+
+document.getElementById("adminPanel").style.display = "none";
+
+}
+
+function login(){
+
+const user = document.getElementById("user").value;
+
+const pass = document.getElementById("pass").value;
+
+if(user === "admin" && pass === "psicosis123"){
+
+document.getElementById("injectorBox").classList.remove("hidden");
+
+alert("Modo inyector activado");
+
+}else{
+
+alert("Datos incorrectos");
+
+}
+
+}
+
+async function injectSong(){
+
+const mp3 = document.getElementById("mp3Url").value;
+
+const cover = document.getElementById("coverUrl").value;
+
+if(!mp3 || !cover){
+
+alert("Completa ambos campos");
+
+return;
+
+}
+
+alert(
+"MP3 inyectado correctamente.\n\n" +
+"En la siguiente versión:\n" +
+"- leerá metadatos ID3\n" +
+"- extraerá artista\n" +
+"- guardará en Firebase automáticamente"
+);
+
+}
+
+</script>
+
+</body>
+</html>
