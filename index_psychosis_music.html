@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Psychosis Music</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#050505;color:#fff}
+header{padding:20px;text-align:center;background:#111;box-shadow:0 0 20px #00d4ff}
+h1{color:#00d4ff}
+#search{width:90%;max-width:600px;padding:12px;border-radius:10px;border:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;padding:20px}
+.card{background:#111;border-radius:12px;padding:12px;box-shadow:0 0 10px #c000ff}
+.card img{width:100%;height:200px;object-fit:cover;border-radius:8px}
+button{padding:10px;border:none;border-radius:8px;cursor:pointer}
+.play{background:#00d4ff}
+.download{background:#ff0088;color:white}
+.player{position:fixed;bottom:0;left:0;right:0;background:#111;padding:10px}
+</style>
+</head>
+<body>
+<header>
+<h1>PSYCHOSIS MUSIC</h1>
+<input id="search" placeholder="Buscar canción o artista">
+</header>
+
+<div id="songs" class="grid"></div>
+
+<div class="player">
+<audio id="audio" controls style="width:100%"></audio>
+</div>
+
+<script>
+const demoSongs=[
+{
+title:"Demo Track 1",
+artist:"DJ Psychosis",
+cover:"https://archive.org/download/etree/etree.jpg",
+audio:"https://archive.org/download/testmp3testfile/mpthreetest.mp3"
+}
+];
+
+const songsDiv=document.getElementById("songs");
+const audio=document.getElementById("audio");
+
+function render(list){
+songsDiv.innerHTML="";
+list.forEach(song=>{
+const card=document.createElement("div");
+card.className="card";
+card.innerHTML=`
+<img src="${song.cover}" alt="cover">
+<h3>${song.title}</h3>
+<p>${song.artist}</p>
+<button class="play">▶ Reproducir</button>
+<button class="download">⬇ Descargar</button>
+`;
+
+card.querySelector(".play").onclick=()=>{
+audio.src=song.audio;
+audio.play();
+};
+
+card.querySelector(".download").onclick=()=>{
+const a=document.createElement("a");
+a.href=song.audio;
+a.download=song.title+".mp3";
+a.click();
+};
+
+songsDiv.appendChild(card);
+});
+}
+
+document.getElementById("search").addEventListener("input",e=>{
+const q=e.target.value.toLowerCase();
+render(demoSongs.filter(s=>
+s.title.toLowerCase().includes(q)||
+s.artist.toLowerCase().includes(q)
+));
+});
+
+render(demoSongs);
+</script>
+</body>
+</html>
