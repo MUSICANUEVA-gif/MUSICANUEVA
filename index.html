@@ -1,0 +1,597 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Psicosis Music PRO</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Orbitron',sans-serif;
+}
+
+body{
+background:
+radial-gradient(circle at top,#17002f,#050010 60%);
+min-height:100vh;
+overflow:hidden;
+display:flex;
+justify-content:center;
+align-items:center;
+color:white;
+}
+
+.bg{
+position:fixed;
+inset:0;
+overflow:hidden;
+z-index:-1;
+}
+
+.circle{
+position:absolute;
+border-radius:50%;
+filter:blur(80px);
+opacity:.35;
+animation:float 8s infinite alternate ease-in-out;
+}
+
+.circle:nth-child(1){
+width:300px;
+height:300px;
+background:#00e1ff;
+top:-80px;
+left:-50px;
+}
+
+.circle:nth-child(2){
+width:350px;
+height:350px;
+background:#8a2cff;
+bottom:-100px;
+right:-80px;
+animation-delay:2s;
+}
+
+@keyframes float{
+from{transform:translateY(0px);}
+to{transform:translateY(40px);}
+}
+
+.player{
+width:430px;
+background:rgba(8,0,25,.82);
+border:1px solid rgba(0,225,255,.25);
+border-radius:35px;
+padding:28px;
+backdrop-filter:blur(18px);
+box-shadow:
+0 0 25px rgba(0,225,255,.25),
+0 0 60px rgba(138,44,255,.2);
+overflow:hidden;
+}
+
+.top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:18px;
+}
+
+.logo{
+font-size:2rem;
+font-weight:700;
+color:#00e1ff;
+text-shadow:0 0 18px #00e1ff;
+cursor:pointer;
+}
+
+.injector{
+padding:10px 18px;
+border-radius:25px;
+border:1px solid #ff3cff;
+background:transparent;
+color:#ff7cff;
+cursor:pointer;
+}
+
+.search{
+width:100%;
+padding:14px;
+border-radius:16px;
+border:1px solid rgba(0,225,255,.25);
+background:#120028;
+color:white;
+outline:none;
+margin-bottom:25px;
+}
+
+.cover-wrap{
+display:flex;
+justify-content:center;
+}
+
+.cover{
+width:250px;
+height:250px;
+border-radius:50%;
+overflow:hidden;
+border:5px solid #00d9ff;
+box-shadow:
+0 0 25px #00d9ff,
+0 0 50px #8a2cff;
+animation:spin 18s linear infinite;
+}
+
+.cover.pause{
+animation-play-state:paused;
+}
+
+.cover img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+@keyframes spin{
+from{transform:rotate(0deg);}
+to{transform:rotate(360deg);}
+}
+
+.info{
+text-align:center;
+margin-top:25px;
+}
+
+.info h2{
+font-size:2rem;
+margin-bottom:8px;
+}
+
+.info p{
+color:#ff8cff;
+}
+
+.download{
+display:block;
+margin:25px auto;
+width:fit-content;
+padding:14px 24px;
+border-radius:30px;
+background:#141414;
+border:1px solid rgba(255,255,255,.2);
+color:white;
+text-decoration:none;
+transition:.3s;
+}
+
+.download:hover{
+transform:scale(1.05);
+box-shadow:0 0 20px #00e1ff55;
+}
+
+.wave{
+display:flex;
+justify-content:center;
+align-items:flex-end;
+gap:5px;
+height:45px;
+margin-top:20px;
+}
+
+.bar{
+width:5px;
+height:15px;
+background:#00d9ff;
+border-radius:10px;
+animation:bounce 1s infinite ease-in-out;
+}
+
+.bar:nth-child(2){animation-delay:.1s;}
+.bar:nth-child(3){animation-delay:.2s;}
+.bar:nth-child(4){animation-delay:.3s;}
+.bar:nth-child(5){animation-delay:.4s;}
+
+@keyframes bounce{
+0%,100%{height:15px;}
+50%{height:40px;}
+}
+
+.controls{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:28px;
+margin-top:20px;
+}
+
+.ctrl{
+font-size:2rem;
+cursor:pointer;
+color:#00e1ff;
+}
+
+.play{
+width:85px;
+height:85px;
+border-radius:50%;
+border:none;
+font-size:2rem;
+cursor:pointer;
+background:#00d9ff;
+box-shadow:0 0 25px #00d9ff;
+}
+
+.playlist{
+margin-top:28px;
+border-top:1px solid rgba(255,255,255,.12);
+padding-top:18px;
+max-height:180px;
+overflow:auto;
+}
+
+.playlist h3{
+font-size:.95rem;
+margin-bottom:15px;
+opacity:.8;
+}
+
+.song{
+padding:14px;
+border-radius:14px;
+background:#0d1b42;
+margin-bottom:10px;
+cursor:pointer;
+transition:.3s;
+}
+
+.song:hover{
+background:#15306d;
+transform:translateX(5px);
+}
+
+audio{
+display:none;
+}
+
+#admin{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+width:360px;
+background:#090015;
+padding:25px;
+border-radius:25px;
+display:none;
+z-index:999;
+box-shadow:0 0 40px #00d9ff;
+}
+
+#admin input{
+width:100%;
+padding:13px;
+margin:10px 0;
+border:none;
+border-radius:12px;
+background:#160030;
+color:white;
+}
+
+#admin button{
+width:100%;
+padding:13px;
+border:none;
+border-radius:14px;
+background:#00d9ff;
+font-weight:bold;
+cursor:pointer;
+margin-top:10px;
+}
+
+.hidden{
+display:none;
+}
+
+@media(max-width:520px){
+
+.player{
+width:95%;
+padding:20px;
+}
+
+.cover{
+width:220px;
+height:220px;
+}
+
+.logo{
+font-size:1.4rem;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="bg">
+<div class="circle"></div>
+<div class="circle"></div>
+</div>
+
+<div class="player">
+
+<div class="top">
+<div class="logo" id="logo">PSICOSIS MUSIC</div>
+<button class="injector">Modo Inyector</button>
+</div>
+
+<input class="search" id="search" placeholder="🔍 Buscar canción o artista...">
+
+<div class="cover-wrap">
+<div class="cover pause" id="coverBox">
+<img id="cover" src="https://picsum.photos/500">
+</div>
+</div>
+
+<div class="info">
+<h2 id="title">Psicosis Music</h2>
+<p id="artist">Archive.org</p>
+</div>
+
+<a class="download" id="download" href="#" target="_blank">
+⬇ Descargar MP3 Original
+</a>
+
+<div class="wave">
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+</div>
+
+<div class="controls">
+<div class="ctrl">⏮</div>
+<button class="play" id="playBtn">▶</button>
+<div class="ctrl">⏭</div>
+</div>
+
+<div class="playlist">
+<h3>PLAYLIST EN LA NUBE</h3>
+<div id="songs"></div>
+</div>
+
+</div>
+
+<audio id="audio"></audio>
+
+<div id="admin">
+
+<h2>Administrador</h2>
+
+<div id="loginBox">
+<input id="user" placeholder="Usuario">
+<input id="pass" type="password" placeholder="Contraseña">
+<button onclick="login()">Entrar</button>
+</div>
+
+<div id="injectorBox" class="hidden">
+<input id="songTitle" placeholder="Título">
+<input id="songArtist" placeholder="Artista">
+<input id="songCover" placeholder="URL portada">
+<input id="songAudio" placeholder="URL MP3 Archive.org">
+
+<button onclick="saveSong()">Guardar Canción</button>
+</div>
+
+<button onclick="closeAdmin()">Cerrar</button>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getDatabase,
+ref,
+push,
+onValue
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyAznXQHLb2b_c0BDIPteN2TPmY8WBmf0fw",
+authDomain: "psicosismusic-2b04a.firebaseapp.com",
+databaseURL: "https://psicosismusic-2b04a-default-rtdb.firebaseio.com",
+projectId: "psicosismusic-2b04a",
+storageBucket: "psicosismusic-2b04a.firebasestorage.app",
+messagingSenderId: "233441166744",
+appId: "1:233441166744:web:6757b5fb8d4fd1803697ed"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const songsRef = ref(db,"songs");
+
+const songsBox = document.getElementById("songs");
+const audio = document.getElementById("audio");
+const title = document.getElementById("title");
+const artist = document.getElementById("artist");
+const cover = document.getElementById("cover");
+const coverBox = document.getElementById("coverBox");
+const download = document.getElementById("download");
+
+let allSongs = [];
+
+onValue(songsRef,(snapshot)=>{
+
+songsBox.innerHTML="";
+allSongs=[];
+
+snapshot.forEach((child)=>{
+
+const song = child.val();
+
+allSongs.push(song);
+
+renderSong(song);
+
+});
+
+if(allSongs.length>0){
+
+playSong(allSongs[0]);
+
+}
+
+});
+
+function renderSong(song){
+
+const div=document.createElement("div");
+
+div.className="song";
+
+div.innerHTML=`
+<b>${song.title}</b><br>
+<small>${song.artist}</small>
+`;
+
+div.onclick=()=>playSong(song);
+
+songsBox.appendChild(div);
+
+}
+
+function playSong(song){
+
+audio.src=song.audio;
+
+title.innerText=song.title;
+
+artist.innerText=song.artist;
+
+cover.src=song.cover || "https://picsum.photos/500";
+
+download.href=song.audio;
+
+audio.play();
+
+document.getElementById("playBtn").innerText="⏸";
+
+coverBox.classList.remove("pause");
+
+}
+
+document.getElementById("playBtn").onclick=()=>{
+
+if(audio.paused){
+
+audio.play();
+
+document.getElementById("playBtn").innerText="⏸";
+coverBox.classList.remove("pause");
+
+}else{
+
+audio.pause();
+
+document.getElementById("playBtn").innerText="▶";
+coverBox.classList.add("pause");
+
+}
+
+};
+
+document.getElementById("search").addEventListener("input",(e)=>{
+
+const value=e.target.value.toLowerCase();
+
+songsBox.innerHTML="";
+
+allSongs
+.filter(song=>
+(song.title||"").toLowerCase().includes(value) ||
+(song.artist||"").toLowerCase().includes(value)
+)
+.forEach(renderSong);
+
+});
+
+window.login=()=>{
+
+const u=document.getElementById("user").value;
+const p=document.getElementById("pass").value;
+
+if(u==="admin" && p==="psicosis123"){
+
+document.getElementById("injectorBox").classList.remove("hidden");
+
+alert("Modo administrador activado");
+
+}else{
+
+alert("Datos incorrectos");
+
+}
+
+};
+
+window.saveSong=async()=>{
+
+const song={
+title:document.getElementById("songTitle").value,
+artist:document.getElementById("songArtist").value,
+cover:document.getElementById("songCover").value,
+audio:document.getElementById("songAudio").value
+};
+
+await push(songsRef,song);
+
+alert("Canción guardada");
+
+};
+
+window.closeAdmin=()=>{
+
+document.getElementById("admin").style.display="none";
+
+};
+
+let clicks=0;
+
+document.getElementById("logo").onclick=()=>{
+
+clicks++;
+
+if(clicks>=3){
+
+document.getElementById("admin").style.display="block";
+
+clicks=0;
+
+}
+
+setTimeout(()=>{
+
+clicks=0;
+
+},1500);
+
+};
+
+</script>
+
+</body>
+</html>
