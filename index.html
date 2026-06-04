@@ -3,220 +3,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Reproductor Cloud</title>
+    <title>Psicosis Music</title>
     <style>
-        /* Estilos visuales con temática oscura tipo Spotify */
+        /* Paleta Cyberpunk Oscura */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: #0b0c16;
             color: #ffffff;
             margin: 0;
             padding: 20px;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 450px;
-            background: #181818;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            min-height: 100vh;
             box-sizing: border-box;
         }
 
-        /* Sección del reproductor actual */
-        .player-card {
+        .player-container {
+            width: 100%;
+            max-width: 400px;
+            background: #0f1123;
+            border: 1px solid #1a1d36;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
             text-align: center;
+            position: relative;
+        }
+
+        /* Encabezado superior */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 25px;
         }
 
-        .cover-art {
-            width: 220px;
-            height: 220px;
-            border-radius: 10px;
-            object-fit: cover;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-            background-color: #282828;
-            margin-bottom: 15px;
+        .brand-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #00e5ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
         }
 
-        .track-title {
-            font-size: 1.4rem;
-            margin: 10px 0 5px 0;
+        .badge-mode {
+            background: transparent;
+            border: 1px solid #bd00ff;
+            color: #bd00ff;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
             font-weight: bold;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            text-shadow: 0 0 8px rgba(189, 0, 255, 0.3);
+        }
+
+        /* Disco Circular de Carátula */
+        .disk-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .disk {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            border: 4px solid #00e5ff;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+            object-fit: cover;
+            background-color: #1a1d36;
+            animation: rotateDisk 12s linear infinite;
+            animation-play-state: paused; /* Solo gira al reproducir */
+        }
+
+        @keyframes rotateDisk {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Información de la canción */
+        .track-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 5px 0;
+            color: #ffffff;
         }
 
         .track-artist {
-            font-size: 1rem;
-            color: #b3b3b3;
+            font-size: 0.95rem;
+            color: #bd00ff;
             margin: 0 0 20px 0;
+            font-weight: 500;
         }
 
-        audio {
-            width: 100%;
+        /* Botón de Descarga MP3 */
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #161933;
+            color: #ffffff;
+            border: 1px solid #2a2f5c;
+            padding: 10px 20px;
             border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            margin-bottom: 25px;
+        }
+
+        .btn-download:hover {
+            background: #2a2f5c;
+            border-color: #00e5ff;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+        }
+
+        /* Controles de Progreso del Tiempo */
+        .progress-area {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #1a1d36;
+            height: 5px;
+            border-radius: 3px;
             outline: none;
+            cursor: pointer;
         }
 
-        /* Sección de la lista de canciones */
-        .playlist-header {
-            font-size: 1.1rem;
-            border-bottom: 1px solid #282828;
-            padding-bottom: 10px;
+        .progress-bar::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00e5ff;
+            box-shadow: 0 0 8px #00e5ff;
+        }
+
+        .time-box {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #646881;
+            margin-top: 5px;
+        }
+
+        /* Botones de control de Audio */
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .btn-nav {
+            background: none;
+            border: none;
+            color: #646881;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .btn-nav:hover {
+            color: #00e5ff;
+        }
+
+        .btn-play {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: #00e5ff;
+            border: none;
+            color: #0b0c16;
+            font-size: 1.4rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .btn-play:hover {
+            transform: scale(1.05);
+        }
+
+        /* Sección de Playlist inferior */
+        .playlist-section {
+            text-align: left;
+        }
+
+        .playlist-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #646881;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             margin-bottom: 10px;
-            color: #b3b3b3;
         }
 
-        .playlist {
+        .playlist-ul {
             list-style: none;
             padding: 0;
             margin: 0;
-            max-height: 250px;
+            max-height: 150px;
             overflow-y: auto;
         }
 
-        /* Barra de scroll personalizada */
-        .playlist::-webkit-scrollbar {
-            width: 6px;
-        }
-        .playlist::-webkit-scrollbar-thumb {
-            background: #3e3e3e;
-            border-radius: 3px;
-        }
-
         .playlist-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 10px;
-            border-radius: 8px;
+            background: #121429;
+            padding: 12px 15px;
+            border-radius: 12px;
+            margin-bottom: 8px;
             cursor: pointer;
-            transition: background 0.2s ease;
-            margin-bottom: 5px;
-        }
-
-        .playlist-item:hover {
-            background-color: #282828;
-        }
-
-        .playlist-item.active {
-            background-color: #282828;
-            color: #1db954; /* Color verde destacado */
-        }
-
-        .item-info {
+            font-size: 0.9rem;
+            border: 1px solid transparent;
+            transition: all 0.2s;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .item-title {
-            font-size: 0.95rem;
-            font-weight: 500;
+        .playlist-item:hover {
+            background: #161933;
+            border-color: #2a2f5c;
         }
 
-        .item-artist {
-            font-size: 0.85rem;
-            color: #b3b3b3;
-        }
-        
-        .no-songs {
-            text-align: center;
-            color: #b3b3b3;
-            font-style: italic;
-            padding: 20px;
+        .playlist-item.active {
+            background: #161933;
+            border-color: #00e5ff;
+            color: #00e5ff;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Tarjeta Principal del Reproductor -->
-        <div class="player-card">
-            <!-- Imagen por defecto si la canción no tiene carátula -->
-            <img id="current-cover" class="cover-art" src="https://placeholder.com" alt="Portada">
-            <div id="current-title" class="track-title">Ninguna canción seleccionada</div>
-            <div id="current-artist" class="track-artist">Sube música desde tu Telegram</div>
-            <audio id="audio-player" controls></audio>
+    <div class="player-container">
+        <!-- Encabezado -->
+        <div class="header-row">
+            <div class="brand-title">Psicosis Music</div>
+            <div class="badge-mode">Modo Inyector</div>
         </div>
 
-        <!-- Lista de canciones cargada dinámicamente -->
-        <div class="playlist-header">Mi Biblioteca Personal</div>
-        <ul id="playlist-container" class="playlist">
-            <!-- Las canciones de playlist.json se insertarán aquí automáticamente -->
-        </ul>
+        <!-- Carátula Giratoria -->
+        <div class="disk-wrapper">
+            <img id="disk-cover" class="disk" src="https://placeholder.com" alt="Disco">
+        </div>
+
+        <!-- Info de la canción -->
+        <div id="track-title" class="track-title">Ninguna canción</div>
+        <div id="track-artist" class="track-artist">Sube archivos MP3 a Telegram</div>
+
+        <!-- Botón de Descarga Directa -->
+        <a id="btn-download" class="btn-download" href="#" download target="_blank" style="display: none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4M7 10l5 5 5-5M12 15V3"/></svg>
+            Descargar MP3 Original
+        </a>
+
+        <!-- Elemento de Audio oculto para controlarlo mediante JS nativo -->
+        <audio id="main-audio"></audio>
+
+        <!-- Progreso -->
+        <div class="progress-area">
+            <input type="range" id="progress-bar" class="progress-bar" value="0" min="0" max="100">
+            <div class="time-box">
+                <span id="current-time">0:00</span>
+                <span id="duration-time">0:00</span>
+            </div>
+        </div>
+
+        <!-- Botones multimedia -->
+        <div class="controls-row">
+            <button class="btn-nav" id="btn-prev">⏮</button>
+            <button class="btn-play" id="btn-play">▶</button>
+            <button class="btn-nav" id="btn-next">⏭</button>
+        </div>
+
+        <!-- Playlist -->
+        <div class="playlist-section">
+            <div id="playlist-header-text" class="playlist-title">Playlist en la nube (0)</div>
+            <ul id="playlist-ul" class="playlist-ul"></ul>
+        </div>
     </div>
 
     <script>
-        const player = document.getElementById('audio-player');
-        const titleText = document.getElementById('current-title');
-        const artistText = document.getElementById('current-artist');
-        const coverImg = document.getElementById('current-cover');
-        const playlistContainer = document.getElementById('playlist-container');
+        const audio = document.getElementById('main-audio');
+        const btnPlay = document.getElementById('btn-play');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const progressBar = document.getElementById('progress-bar');
+        const currentTimeText = document.getElementById('current-time');
+        const durationTimeText = document.getElementById('duration-time');
+        const diskCover = document.getElementById('disk-cover');
+        const trackTitle = document.getElementById('track-title');
+        const trackArtist = document.getElementById('track-artist');
+        const btnDownload = document.getElementById('btn-download');
+        const playlistUl = document.getElementById('playlist-ul');
+        const playlistHeader = document.getElementById('playlist-header-text');
 
-        let currentActiveItem = null;
+        let songsList = [];
+        let currentIndex = 0;
 
-        // Cargar y procesar la lista desde playlist.json
-        fetch('playlist.json')
-            .then(response => {
-                if (!response.ok) throw new Error('Aún no existe playlist.json');
-                return response.json();
-            })
-            .then(songs => {
-                if (songs.length === 0) {
-                    mostrarMensajeVacio();
-                    return;
-                }
-
-                // Generar la lista visual canción por canción
-                songs.forEach((song, index) => {
-                    const li = document.createElement('li');
-                    li.className = 'playlist-item';
-                    
-                    li.innerHTML = `
-                        <div class="item-info">
-                            <div class="item-title">${song.title}</div>
-                            <div class="item-artist">${song.artist}</div>
-                        </div>
-                    `;
-
-                    // Evento al hacer clic en una canción
-                    li.onclick = () => {
-                        // Cambiar la clase activa visualmente
-                        if (currentActiveItem) currentActiveItem.classList.remove('active');
-                        li.classList.add('active');
-                        currentActiveItem = li;
-
-                        // Cambiar los datos del reproductor principal
-                        player.src = song.audio_url;
-                        titleText.textContent = song.title;
-                        artistText.textContent = song.artist;
-                        
-                        // Si la automatización de Telegram extrajo carátula, la usa; si no, deja la genérica
-                        coverImg.src = song.cover_url && song.cover_url.trim() !== "" 
-                            ? song.cover_url 
-                            : "https://placeholder.com";
-                        
-                        // Iniciar reproducción
-                        player.play();
-                    };
-
-                    playlistContainer.appendChild(li);
-                });
-            })
-            .catch(error => {
-                console.log(error);
-                mostrarMensajeVacio();
-            });
-
-        function mostrarMensajeVacio() {
-            playlistContainer.innerHTML = '<div class="no-songs">Tu playlist está vacía. Envía audios a tu canal para verlos aquí.</div>';
+        // Formatear segundos a minutos (0:00)
+        function formatTime(secs) {
+            if (isNaN(secs)) return "0:00";
+            const m = Math.floor(secs / 60);
+            const s = Math.floor(secs % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
         }
-    </script>
-</body>
-</html>
+
+        // Cargar canción seleccionada
+        function loadTrack(index) {
+            if (!songsList[index]) return;
+            currentIndex = index;
