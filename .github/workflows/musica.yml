@@ -2,18 +2,20 @@ name: Actualizar Musica desde Telegram
 
 on:
   schedule:
-    - cron: '*/5 * * * *' # Se ejecuta solo cada 5 minutos
-  workflow_dispatch: # Permite activarlo a mano si quieres
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
 jobs:
   update-playlist:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Descargar repositorio
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configurar Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
@@ -43,9 +45,14 @@ jobs:
               sha = res.json().get("sha") if res.status_code == 200 else None
               data = {"message": msg, "content": base64.b64encode(datos).decode("utf-8")}
               if sha: data["sha"] = sha
-              requests.put(url, headers=h, json=data)
+              r = requests.put(url, headers=h, json=data)
+              print(f"Subida {ruta}: {r.status_code}")
 
-          updates = bot.get_updates(limit=10, allowed_updates=["channel_post"])
+          try:
+              updates = bot.get_updates(limit=50, allowed_updates=["channel_post"])
+          except Exception as e:
+              print(f"Error al conectar con Telegram: {e}")
+              updates = []
           
           url_json = f"https://githubusercontent.com{REPO}/main/playlist.json"
           res_json = requests.get(url_json)
@@ -55,44 +62,47 @@ jobs:
           actualizado = False
 
           for u in updates:
+              if not hasattr(u, "channel_post") or u.channel_post is None:
+                  continue
               post = u.channel_post
-              if post and post.audio:
+              if post.audio:
                   fid = post.audio.file_id
                   uid = post.audio.file_unique_id
                   ruta_pista = f"tracks/{uid}.mp3"
                   url_final = f"https://github.io{ruta_pista}"
                   
                   if url_final not in urls_existentes:
-                      print(f"Nueva cancion hallada: {post.audio.title}")
-                      info = bot.get_file(fid)
-                      f_bytes = bot.download_file(info.file_path)
-                      
-                      with open("t.mp3", "wb") as f: f.write(f_bytes)
-                      
-                      titulo = post.audio.title or "Titulo Desconocido"
-                      artista = post.audio.performer or "Artista Desconocido"
-                      c_url = ""
-                      
                       try:
-                          m = music_tag.load_file("t.mp3")
-                          if m["title"]: titulo = str(m["title"])
-                          if m["artist"]: artista = str(m["artist"])
-                          if m["artwork"]:
-                              c_name = f"covers/{uid}.jpg"
-                              sube_gh(c_name, m["artwork"].first.data, "Nueva portada")
-                              c_url = f"https://github.io{c_name}"
-                      except: pass
-                      
-                      if os.path.exists("t.mp3"): os.remove("t.mp3")
-                      
-                      sube_gh(ruta_pista, f_bytes, f"Track: {titulo}")
-                      playlist.append({"title": titulo, "artist": artista, "audio_url": url_final, "cover_url": c_url})
-                      urls_existentes.append(url_final)
-                      actualizado = True
+                          info = bot.get_file(fid)
+                          f_bytes = bot.download_file(info.file_path)
+                          
+                          with open("t.mp3", "wb") as f: f.write(f_bytes)
+                          
+                          titulo = post.audio.title or "Pista Nueva"
+                          artista = post.audio.performer or "Desconocido"
+                          c_url = ""
+                          
+                          try:
+                              m = music_tag.load_file("t.mp3")
+                              if m["title"]: titulo = str(m["title"])
+                              if m["artist"]: artista = str(m["artist"])
+                              if m["artwork"]:
+                                  c_name = f"covers/{uid}.jpg"
+                                  sube_gh(c_name, m["artwork"].first.data, "Nueva portada")
+                                  c_url = f"https://github.io{c_name}"
+                          except: pass
+                          
+                          if os.path.exists("t.mp3"): os.remove("t.mp3")
+                          
+                          sube_gh(ruta_pista, f_bytes, f"Audio: {titulo}")
+                          playlist.append({"title": titulo, "artist": artista, "audio_url": url_final, "cover_url": c_url})
+                          urls_existentes.append(url_final)
+                          actualizado = True
+                      except Exception as ex:
+                          print(f"Error procesando cancion: {ex}")
           
           if actualizado:
               sube_gh("playlist.json", json.dumps(playlist, indent=4).encode("utf-8"), "Playlist actualizada")
-              print("¡Playlist actualizada!")
           else:
-              print("No hay canciones nuevas.")
+              print("No se encontraron canciones nuevas en los registros.")
           '
