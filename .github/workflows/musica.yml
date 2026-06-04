@@ -54,7 +54,7 @@ jobs:
               print(f"Error al conectar con Telegram: {e}")
               updates = []
           
-          url_json = f"https://githubusercontent.com{REPO}/main/playlist.json"
+          url_json = "https://githubusercontent.com"
           res_json = requests.get(url_json)
           playlist = res_json.json() if res_json.status_code == 200 else []
           
@@ -98,6 +98,7 @@ jobs:
                           playlist.append({"title": titulo, "artist": artista, "audio_url": url_final, "cover_url": c_url})
                           urls_existentes.append(url_final)
                           actualizado = True
+                          print(f"Agregada con exito: {titulo}")
                       except Exception as ex:
                           print(f"Error procesando cancion: {ex}")
           
