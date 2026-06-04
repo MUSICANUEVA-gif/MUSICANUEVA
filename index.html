@@ -1,833 +1,222 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Psicosis Music PRO</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Reproductor Cloud</title>
+    <style>
+        /* Estilos visuales con temática oscura tipo Spotify */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: #181818;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
 
-<style>
+        /* Sección del reproductor actual */
+        .player-card {
+            text-align: center;
+            margin-bottom: 25px;
+        }
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
+        .cover-art {
+            width: 220px;
+            height: 220px;
+            border-radius: 10px;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            background-color: #282828;
+            margin-bottom: 15px;
+        }
 
-body{
-background:#06000d;
-color:white;
-overflow-x:hidden;
-}
+        .track-title {
+            font-size: 1.4rem;
+            margin: 10px 0 5px 0;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-/* FONDO GLOBAL */
+        .track-artist {
+            font-size: 1rem;
+            color: #b3b3b3;
+            margin: 0 0 20px 0;
+        }
 
-body::before{
-content:"";
-position:fixed;
-width:100%;
-height:100%;
-top:0;
-left:0;
-background:
-linear-gradient(rgba(5,0,15,.92),rgba(5,0,15,.97)),
-url('https://i.imgur.com/4AiXzf8.jpeg');
-background-size:cover;
-background-position:center;
-z-index:-5;
-}
+        audio {
+            width: 100%;
+            border-radius: 30px;
+            outline: none;
+        }
 
-/* APP */
+        /* Sección de la lista de canciones */
+        .playlist-header {
+            font-size: 1.1rem;
+            border-bottom: 1px solid #282828;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            color: #b3b3b3;
+        }
 
-.app{
-display:flex;
-min-height:100vh;
-}
+        .playlist {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 250px;
+            overflow-y: auto;
+        }
 
-/* SIDEBAR */
+        /* Barra de scroll personalizada */
+        .playlist::-webkit-scrollbar {
+            width: 6px;
+        }
+        .playlist::-webkit-scrollbar-thumb {
+            background: #3e3e3e;
+            border-radius: 3px;
+        }
 
-.sidebar{
-width:260px;
-background:rgba(15,0,35,.88);
-backdrop-filter:blur(25px);
-padding:25px;
-position:fixed;
-height:100%;
-border-right:1px solid rgba(255,255,255,.05);
-z-index:50;
-}
+        .playlist-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            margin-bottom: 5px;
+        }
 
-.logo{
-font-size:52px;
-font-weight:800;
-line-height:0.9;
-margin-bottom:50px;
-cursor:pointer;
-background:linear-gradient(45deg,#ff00ff,#7a2fff);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-}
+        .playlist-item:hover {
+            background-color: #282828;
+        }
 
-.menu button{
-width:100%;
-padding:18px;
-margin-bottom:16px;
-border:none;
-border-radius:18px;
-background:rgba(255,255,255,.06);
-color:white;
-font-size:19px;
-font-weight:600;
-cursor:pointer;
-transition:.3s;
-}
+        .playlist-item.active {
+            background-color: #282828;
+            color: #1db954; /* Color verde destacado */
+        }
 
-.menu button:hover{
-transform:translateX(5px);
-background:linear-gradient(45deg,#7000ff,#ff00ff);
-}
+        .item-info {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-/* MAIN */
+        .item-title {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
 
-.main{
-margin-left:260px;
-margin-right:370px;
-padding:30px;
-width:100%;
-}
-
-/* HERO */
-
-.hero{
-height:360px;
-border-radius:35px;
-overflow:hidden;
-position:relative;
-margin-bottom:35px;
-display:flex;
-align-items:flex-end;
-padding:45px;
-box-shadow:0 0 60px rgba(174,0,255,.35);
-background:
-linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.25)),
-url('https://files.catbox.moe/3jltm8.png');
-background-size:cover;
-background-position:center top;
-}
-
-.hero::after{
-content:"";
-position:absolute;
-width:100%;
-height:100%;
-top:0;
-left:0;
-background:linear-gradient(90deg,rgba(0,0,0,.65),rgba(0,0,0,.1));
-}
-
-.heroContent{
-position:relative;
-z-index:5;
-}
-
-.hero h1{
-font-size:78px;
-font-weight:800;
-margin-bottom:15px;
-text-shadow:0 0 20px #000;
-}
-
-.hero p{
-font-size:18px;
-opacity:.85;
-margin-bottom:20px;
-}
-
-.search{
-width:430px;
-max-width:100%;
-padding:18px 24px;
-border:none;
-outline:none;
-border-radius:50px;
-background:rgba(255,255,255,.14);
-backdrop-filter:blur(10px);
-color:white;
-font-size:18px;
-}
-
-/* SONGS */
-
-.song-grid{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
-gap:25px;
-}
-
-.song-card{
-background:rgba(255,255,255,.05);
-border-radius:26px;
-overflow:hidden;
-cursor:pointer;
-transition:.35s;
-position:relative;
-backdrop-filter:blur(14px);
-border:1px solid rgba(255,255,255,.04);
-}
-
-.song-card:hover{
-transform:translateY(-8px);
-box-shadow:0 0 40px rgba(195,0,255,.35);
-}
-
-.song-card img{
-width:100%;
-height:230px;
-object-fit:cover;
-}
-
-.song-info{
-padding:18px;
-}
-
-.song-info h3{
-font-size:24px;
-font-weight:700;
-margin-bottom:6px;
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
-}
-
-.song-info p{
-opacity:.7;
-font-size:15px;
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
-}
-
-/* DELETE BTN */
-
-.deleteBtn{
-position:absolute;
-top:12px;
-right:12px;
-width:42px;
-height:42px;
-border:none;
-border-radius:50%;
-background:#ff004c;
-color:white;
-font-size:18px;
-font-weight:700;
-cursor:pointer;
-z-index:999;
-display:none;
-box-shadow:0 0 15px rgba(255,0,90,.5);
-}
-
-/* PLAYER */
-
-.player{
-width:360px;
-height:100%;
-position:fixed;
-right:0;
-top:0;
-background:rgba(10,10,25,.88);
-backdrop-filter:blur(25px);
-padding:25px;
-border-left:1px solid rgba(255,255,255,.06);
-overflow:auto;
-}
-
-.adminTag{
-position:absolute;
-top:15px;
-right:18px;
-background:#8f00ff;
-padding:10px 18px;
-border-radius:30px;
-font-weight:700;
-display:none;
-}
-
-.cover{
-width:100%;
-border-radius:30px;
-box-shadow:0 0 40px rgba(180,0,255,.35);
-margin-bottom:25px;
-}
-
-.player h2{
-font-size:58px;
-line-height:1;
-margin-bottom:10px;
-word-break:break-word;
-}
-
-.player p{
-opacity:.75;
-margin-bottom:20px;
-font-size:18px;
-}
-
-.playBtn{
-width:120px;
-height:120px;
-border:none;
-border-radius:50%;
-background:linear-gradient(45deg,#6a00ff,#ff00ff);
-color:white;
-font-size:45px;
-cursor:pointer;
-display:block;
-margin:25px auto;
-box-shadow:0 0 45px rgba(195,0,255,.6);
-}
-
-audio{
-width:100%;
-margin-top:20px;
-}
-
-.download{
-width:100%;
-padding:20px;
-margin-top:25px;
-border:none;
-border-radius:20px;
-background:linear-gradient(45deg,#6a00ff,#ff00ff);
-color:white;
-font-size:24px;
-font-weight:700;
-cursor:pointer;
-}
-
-/* ADMIN PANEL */
-
-.adminPanel{
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-width:460px;
-background:#11001f;
-padding:35px;
-border-radius:28px;
-z-index:999999;
-display:none;
-box-shadow:0 0 60px rgba(255,0,255,.5);
-}
-
-.adminPanel h2{
-margin-bottom:20px;
-font-size:35px;
-}
-
-.adminPanel input{
-width:100%;
-padding:16px;
-margin-bottom:15px;
-border:none;
-border-radius:14px;
-background:#1d0830;
-color:white;
-font-size:16px;
-outline:none;
-}
-
-.adminPanel button{
-width:100%;
-padding:16px;
-border:none;
-border-radius:14px;
-background:linear-gradient(45deg,#6a00ff,#ff00ff);
-color:white;
-font-size:18px;
-font-weight:700;
-margin-top:10px;
-cursor:pointer;
-}
-
-/* MOBILE */
-
-@media(max-width:950px){
-
-.sidebar{
-display:none;
-}
-
-.main{
-margin-left:0;
-margin-right:0;
-padding:15px;
-}
-
-.player{
-position:relative;
-width:100%;
-height:auto;
-margin-top:30px;
-border-radius:30px;
-}
-
-.app{
-flex-direction:column;
-}
-
-.hero{
-height:280px;
-padding:25px;
-}
-
-.hero h1{
-font-size:46px;
-}
-
-.song-grid{
-grid-template-columns:repeat(2,1fr);
-gap:15px;
-}
-
-.song-card img{
-height:170px;
-}
-
-.player h2{
-font-size:42px;
-}
-
-}
-
-</style>
+        .item-artist {
+            font-size: 0.85rem;
+            color: #b3b3b3;
+        }
+        
+        .no-songs {
+            text-align: center;
+            color: #b3b3b3;
+            font-style: italic;
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
 
-<div class="app">
-
-<!-- SIDEBAR -->
-
-<div class="sidebar">
-
-<div class="logo" id="logo">
-PSICOSI<br>MUSIC
-</div>
-
-<div class="menu">
-<button>🏠 Inicio</button>
-<button>🔥 Tendencias</button>
-<button>🎵 Playlist</button>
-<button>❤️ Favoritos</button>
-<button>⬇ Descargas</button>
-</div>
-
-</div>
-
-<!-- MAIN -->
-
-<div class="main">
-
-<div class="hero">
-<div class="heroContent">
-<h1>Psicosis Music</h1>
-<p>La música nueva primero aquí</p>
-
-<input class="search" id="search"
-placeholder="Buscar canción o artista">
-</div>
-</div>
-
-<div class="song-grid" id="songs"></div>
-
-</div>
-
-<!-- PLAYER -->
-
-<div class="player">
-
-<div class="adminTag" id="adminTag">
-ADMIN
-</div>
-
-<img id="cover" class="cover"
-src="https://i.imgur.com/4AiXzf8.jpeg">
-
-<h2 id="title">Selecciona</h2>
-<p id="artist">Psicosis Music</p>
-
-<button class="playBtn" id="playBtn">▶</button>
-
-<audio id="audio" controls></audio>
-
-<button class="download" id="downloadBtn">
-⬇ Descargar MP3
-</button>
-
-</div>
-
-</div>
-
-<!-- PANEL ADMIN -->
-
-<div class="adminPanel" id="adminPanel">
-
-<h2>Inyector Psicosis</h2>
-
-<input id="user" placeholder="Usuario">
-<input id="pass" type="password" placeholder="Contraseña">
-
-<button onclick="login()">ENTRAR</button>
-
-<hr style="margin:20px 0;border-color:#333;">
-
-<input id="songUrl" placeholder="URL MP3">
-<input id="coverUrl" placeholder="URL COVER">
-
-<div id="manualMeta" style="display:none;">
-
-<input id="manualTitle" placeholder="Título manual">
-<input id="manualArtist" placeholder="Artista manual">
-
-</div>
-
-<button onclick="injectSong()">
-INYECTAR CANCIÓN
-</button>
-
-<button onclick="closePanel()">
-CERRAR
-</button>
-
-</div>
-
-<script type="module">
-
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-import {
-getDatabase,
-ref,
-push,
-onValue,
-remove
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-const firebaseConfig = {
-
-apiKey: "AIzaSyAznXQHLb2b_c0BDIPteN2TPmY8WBmf0fw",
-authDomain: "psicosismusic-2b04a.firebaseapp.com",
-databaseURL: "https://psicosismusic-2b04a-default-rtdb.firebaseio.com",
-projectId: "psicosismusic-2b04a",
-storageBucket: "psicosismusic-2b04a.appspot.com",
-messagingSenderId: "233441166744",
-appId: "1:233441166744:web:6757b5fb8d4fd1803697ed"
-
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-let isAdmin = false;
-
-const songsDiv = document.getElementById("songs");
-
-const audio = document.getElementById("audio");
-const title = document.getElementById("title");
-const artist = document.getElementById("artist");
-const cover = document.getElementById("cover");
-const playBtn = document.getElementById("playBtn");
-
-let currentSong = null;
-
-/* ADMIN OPEN */
-
-let clicks = 0;
-
-document.getElementById("logo")
-.addEventListener("click",()=>{
-
-clicks++;
-
-if(clicks >= 3){
-
-document.getElementById("adminPanel")
-.style.display="block";
-
-clicks = 0;
-
-}
-
-setTimeout(()=>clicks=0,1000);
-
-});
-
-/* LOGIN */
-
-window.login = function(){
-
-const u = document.getElementById("user").value;
-const p = document.getElementById("pass").value;
-
-if(u === "admin" && p === "admin123"){
-
-isAdmin = true;
-
-document.getElementById("adminTag")
-.style.display="block";
-
-alert("ADMIN ACTIVADO");
-
-loadSongs();
-
-}else{
-
-alert("Datos incorrectos");
-
-}
-
-}
-
-/* CLOSE PANEL */
-
-window.closePanel = function(){
-
-document.getElementById("adminPanel")
-.style.display="none";
-
-}
-
-/* PLAYER */
-
-playBtn.onclick = ()=>{
-
-if(audio.paused){
-
-audio.play();
-playBtn.innerHTML="⏸";
-
-}else{
-
-audio.pause();
-playBtn.innerHTML="▶";
-
-}
-
-}
-
-/* DOWNLOAD */
-
-document.getElementById("downloadBtn")
-.onclick = ()=>{
-
-if(!currentSong) return;
-
-const a = document.createElement("a");
-
-a.href = currentSong.url;
-a.download = currentSong.title + ".mp3";
-
-document.body.appendChild(a);
-
-a.click();
-
-a.remove();
-
-}
-
-/* LOAD SONGS */
-
-function loadSongs(){
-
-onValue(ref(db,"songs"),snapshot=>{
-
-songsDiv.innerHTML="";
-
-snapshot.forEach(item=>{
-
-const song = item.val();
-const key = item.key;
-
-const div = document.createElement("div");
-
-div.className="song-card";
-
-div.innerHTML = `
-
-<button class="deleteBtn"
-style="${isAdmin ? 'display:block' : 'display:none'}">
-✕
-</button>
-
-<img src="${song.cover}">
-
-<div class="song-info">
-<h3>${song.title}</h3>
-<p>${song.artist}</p>
-</div>
-
-`;
-
-/* PLAY SONG */
-
-div.addEventListener("click",()=>{
-
-currentSong = song;
-
-audio.src = song.url;
-
-title.innerText = song.title;
-artist.innerText = song.artist;
-cover.src = song.cover;
-
-audio.play();
-
-playBtn.innerHTML="⏸";
-
-});
-
-/* DELETE */
-
-const deleteBtn = div.querySelector(".deleteBtn");
-
-deleteBtn.addEventListener("click",(e)=>{
-
-e.stopPropagation();
-
-if(confirm("¿Eliminar canción?")){
-
-remove(ref(db,"songs/"+key));
-
-}
-
-});
-
-songsDiv.appendChild(div);
-
-});
-
-});
-
-}
-
-loadSongs();
-
-/* SEARCH */
-
-document.getElementById("search")
-.addEventListener("input",(e)=>{
-
-const value = e.target.value.toLowerCase();
-
-document.querySelectorAll(".song-card")
-.forEach(card=>{
-
-card.style.display = card.innerText
-.toLowerCase()
-.includes(value)
-? "block"
-: "none";
-
-});
-
-});
-
-/* INJECT SONG */
-
-window.injectSong = async function(){
-
-if(!isAdmin){
-alert("No eres admin");
-return;
-}
-
-const url = document.getElementById("songUrl").value;
-const coverUrl = document.getElementById("coverUrl").value;
-
-if(!url || !coverUrl){
-
-alert("Faltan datos");
-return;
-
-}
-
-let autoTitle = "";
-let autoArtist = "";
-
-/* AUTO META */
-
-try{
-
-const filename = decodeURIComponent(
-url.split("/").pop()
-);
-
-autoTitle = filename
-.replace(".mp3","")
-.replace(/[-_]/g," ");
-
-autoArtist = "Artista Desconocido";
-
-}catch(e){
-
-}
-
-/* MANUAL */
-
-if(autoTitle.trim() === ""){
-
-document.getElementById("manualMeta")
-.style.display="block";
-
-autoTitle =
-document.getElementById("manualTitle").value;
-
-autoArtist =
-document.getElementById("manualArtist").value;
-
-if(!autoTitle || !autoArtist){
-
-alert("Completa título y artista");
-return;
-
-}
-
-}
-
-/* SAVE */
-
-push(ref(db,"songs"),{
-
-title:autoTitle,
-artist:autoArtist,
-url:url,
-cover:coverUrl
-
-});
-
-alert("Canción agregada");
-
-document.getElementById("songUrl").value="";
-document.getElementById("coverUrl").value="";
-document.getElementById("manualTitle").value="";
-document.getElementById("manualArtist").value="";
-
-}
-
-/* AUDIO END */
-
-audio.onended=()=>{
-
-playBtn.innerHTML="▶";
-
-}
-
-</script>
-
+    <div class="container">
+        <!-- Tarjeta Principal del Reproductor -->
+        <div class="player-card">
+            <!-- Imagen por defecto si la canción no tiene carátula -->
+            <img id="current-cover" class="cover-art" src="https://placeholder.com" alt="Portada">
+            <div id="current-title" class="track-title">Ninguna canción seleccionada</div>
+            <div id="current-artist" class="track-artist">Sube música desde tu Telegram</div>
+            <audio id="audio-player" controls></audio>
+        </div>
+
+        <!-- Lista de canciones cargada dinámicamente -->
+        <div class="playlist-header">Mi Biblioteca Personal</div>
+        <ul id="playlist-container" class="playlist">
+            <!-- Las canciones de playlist.json se insertarán aquí automáticamente -->
+        </ul>
+    </div>
+
+    <script>
+        const player = document.getElementById('audio-player');
+        const titleText = document.getElementById('current-title');
+        const artistText = document.getElementById('current-artist');
+        const coverImg = document.getElementById('current-cover');
+        const playlistContainer = document.getElementById('playlist-container');
+
+        let currentActiveItem = null;
+
+        // Cargar y procesar la lista desde playlist.json
+        fetch('playlist.json')
+            .then(response => {
+                if (!response.ok) throw new Error('Aún no existe playlist.json');
+                return response.json();
+            })
+            .then(songs => {
+                if (songs.length === 0) {
+                    mostrarMensajeVacio();
+                    return;
+                }
+
+                // Generar la lista visual canción por canción
+                songs.forEach((song, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'playlist-item';
+                    
+                    li.innerHTML = `
+                        <div class="item-info">
+                            <div class="item-title">${song.title}</div>
+                            <div class="item-artist">${song.artist}</div>
+                        </div>
+                    `;
+
+                    // Evento al hacer clic en una canción
+                    li.onclick = () => {
+                        // Cambiar la clase activa visualmente
+                        if (currentActiveItem) currentActiveItem.classList.remove('active');
+                        li.classList.add('active');
+                        currentActiveItem = li;
+
+                        // Cambiar los datos del reproductor principal
+                        player.src = song.audio_url;
+                        titleText.textContent = song.title;
+                        artistText.textContent = song.artist;
+                        
+                        // Si la automatización de Telegram extrajo carátula, la usa; si no, deja la genérica
+                        coverImg.src = song.cover_url && song.cover_url.trim() !== "" 
+                            ? song.cover_url 
+                            : "https://placeholder.com";
+                        
+                        // Iniciar reproducción
+                        player.play();
+                    };
+
+                    playlistContainer.appendChild(li);
+                });
+            })
+            .catch(error => {
+                console.log(error);
+                mostrarMensajeVacio();
+            });
+
+        function mostrarMensajeVacio() {
+            playlistContainer.innerHTML = '<div class="no-songs">Tu playlist está vacía. Envía audios a tu canal para verlos aquí.</div>';
+        }
+    </script>
 </body>
 </html>
