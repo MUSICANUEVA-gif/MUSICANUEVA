@@ -35,7 +35,7 @@ jobs:
           TOKEN = os.environ["TELEGRAM_TOKEN"]
           REPO = os.environ["GITHUB_REPO"]
           GH_TOKEN = os.environ["GITHUB_TOKEN"]
-          CHAT_ID = -1003982353300  # Tu ID real descubierto
+          CHAT_ID = -1003982353300
           
           bot = telebot.TeleBot(TOKEN)
           
@@ -49,7 +49,6 @@ jobs:
               requests.put(url, headers=h, json=data)
 
           try:
-              # Forzar lectura directa del historial del canal por ID
               updates = bot.get_updates(limit=100, allowed_updates=["channel_post"])
           except:
               updates = []
@@ -64,7 +63,6 @@ jobs:
           urls_existentes = [s["audio_url"] for s in playlist]
           actualizado = False
 
-          # 1. Intentar capturar por historial dinámico
           for u in updates:
               post = getattr(u, "channel_post", None)
               if post and post.audio and str(post.chat.id) == str(CHAT_ID):
@@ -101,7 +99,6 @@ jobs:
                           actualizado = True
                       except: pass
 
-          # 2. Inyección forzada de seguridad si Telegram oculta el historial dinámico
           if len(playlist) == 0:
               playlist = [
                   {
@@ -127,5 +124,5 @@ jobs:
 
           if actualizado:
               sube_gh("playlist.json", json.dumps(playlist, indent=4).encode("utf-8"), "Sincronizacion de Playlist Completa")
-              print("¡Playlist sincronizada con exito!")
+              print("Exito")
           '
