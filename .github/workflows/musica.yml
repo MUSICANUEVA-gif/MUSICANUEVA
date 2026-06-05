@@ -45,13 +45,11 @@ jobs:
               sha = res.json().get("sha") if res.status_code == 200 else None
               data = {"message": msg, "content": base64.b64encode(datos).decode("utf-8")}
               if sha: data["sha"] = sha
-              r = requests.put(url, headers=h, json=data)
-              print(f"Subida {ruta}: {r.status_code}")
+              requests.put(url, headers=h, json=data)
 
           try:
               updates = bot.get_updates(limit=50, allowed_updates=["channel_post"])
-          except Exception as e:
-              print(f"Error al conectar con Telegram: {e}")
+          except:
               updates = []
           
           url_json = "https://githubusercontent.com"
@@ -98,12 +96,12 @@ jobs:
                           playlist.append({"title": titulo, "artist": artista, "audio_url": url_final, "cover_url": c_url})
                           urls_existentes.append(url_final)
                           actualizado = True
-                          print(f"Agregada: {titulo}")
-                      except Exception as ex:
-                          print(f"Error procesando cancion: {ex}")
+                      except:
+                          pass
           
           if actualizado:
               sube_gh("playlist.json", json.dumps(playlist, indent=4).encode("utf-8"), "Playlist actualizada")
+              print("Exito")
           else:
-              print("No se encontraron canciones nuevas en los registros.")
+              print("No hay canciones nuevas.")
           '
