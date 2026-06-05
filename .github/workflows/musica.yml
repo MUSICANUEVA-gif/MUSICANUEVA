@@ -98,7 +98,7 @@ jobs:
                           playlist.append({"title": titulo, "artist": artista, "audio_url": url_final, "cover_url": c_url})
                           urls_existentes.append(url_final)
                           actualizado = True
-                          print(f"Agregada con exito: {titulo}")
+                          print(f"Agregada: {titulo}")
                       except Exception as ex:
                           print(f"Error procesando cancion: {ex}")
           
