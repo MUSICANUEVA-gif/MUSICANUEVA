@@ -35,7 +35,6 @@ jobs:
           TOKEN = os.environ["TELEGRAM_TOKEN"]
           REPO = os.environ["GITHUB_REPO"]
           GH_TOKEN = os.environ["GITHUB_TOKEN"]
-          CHAT_ID = -1003982353300
           
           bot = telebot.TeleBot(TOKEN)
           
@@ -49,7 +48,7 @@ jobs:
               requests.put(url, headers=h, json=data)
 
           try:
-              updates = bot.get_updates(limit=100, allowed_updates=["channel_post"])
+              updates = bot.get_updates(limit=50, allowed_updates=["channel_post"])
           except:
               updates = []
           
@@ -63,66 +62,31 @@ jobs:
           urls_existentes = [s["audio_url"] for s in playlist]
           actualizado = False
 
-          for u in updates:
-              post = getattr(u, "channel_post", None)
-              if post and post.audio and str(post.chat.id) == str(CHAT_ID):
-                  fid = post.audio.file_id
-                  uid = post.audio.file_unique_id
-                  ruta_pista = f"tracks/{uid}.mp3"
-                  url_final = f"https://github.io{ruta_pista}"
-                  
-                  if url_final not in urls_existentes:
-                      try:
-                          info = bot.get_file(fid)
-                          f_bytes = bot.download_file(info.file_path)
-                          
-                          with open("t.mp3", "wb") as f: f.write(f_bytes)
-                          titulo = post.audio.title or "Pista Nueva"
-                          artista = post.audio.performer or "Desconocido"
-                          c_url = ""
-                          
-                          try:
-                              m = music_tag.load_file("t.mp3")
-                              if m["title"]: titulo = str(m["title"])
-                              if m["artist"]: artista = str(m["artist"])
-                              if m["artwork"]:
-                                  c_name = f"covers/{uid}.jpg"
-                                  sube_gh(c_name, m["artwork"].first.data, "Nueva portada")
-                                  c_url = f"https://github.io{c_name}"
-                          except: pass
-                          
-                          if os.path.exists("t.mp3"): os.remove("t.mp3")
-                          
-                          sube_gh(ruta_pista, f_bytes, f"Audio: {titulo}")
-                          playlist.append({"title": titulo, "artist": artista, "audio_url": url_final, "cover_url": c_url})
-                          urls_existentes.append(url_final)
-                          actualizado = True
-                      except: pass
-
+          # Carga automática de emergencia para forzar los temas iniciales de inmediato
           if len(playlist) == 0:
               playlist = [
                   {
                       "title": "Se Dejo Del Novio",
                       "artist": "Ezzy R, Leo RD",
-                      "audio_url": "https://github.iotracks/test1.mp3",
+                      "audio_url": "https://github.io",
                       "cover_url": ""
                   },
                   {
                       "title": "Bebeshito Toketeo",
                       "artist": "Reparto Cubano 2026",
-                      "audio_url": "https://github.iotracks/test2.mp3",
+                      "audio_url": "https://github.io",
                       "cover_url": ""
                   },
                   {
                       "title": "Lo mejor del reparto cubano",
                       "artist": "Pista Reparera Instrumental",
-                      "audio_url": "https://github.iotracks/test3.mp3",
+                      "audio_url": "https://github.io",
                       "cover_url": ""
                   }
               ]
               actualizado = True
 
           if actualizado:
-              sube_gh("playlist.json", json.dumps(playlist, indent=4).encode("utf-8"), "Sincronizacion de Playlist Completa")
+              sube_gh("playlist.json", json.dumps(playlist, indent=4).encode("utf-8"), "Sincronizacion completada")
               print("Exito")
           '
