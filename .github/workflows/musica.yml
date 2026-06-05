@@ -52,9 +52,13 @@ jobs:
           except:
               updates = []
           
-          url_json = "https://githubusercontent.com"
-          res_json = requests.get(url_json)
-          playlist = res_json.json() if res_json.status_code == 200 else []
+          # LEER EL ARCHIVO LOCALMENTE PARA EVITAR ERRORES DE INTERNET
+          if os.path.exists("playlist.json"):
+              with open("playlist.json", "r", encoding="utf-8") as f:
+                  try: playlist = json.load(f)
+                  except: playlist = []
+          else:
+              playlist = []
           
           urls_existentes = [s["audio_url"] for s in playlist]
           actualizado = False
